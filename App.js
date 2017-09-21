@@ -18,23 +18,41 @@
 import React, { Component } from 'react'
 import Expo from 'expo'
 import AppContainer from './components/AppContainer'
+import Database from './dao'
 
+import stores from './stores'
+import { Provider } from 'mobx-react'
 import { useStrict } from 'mobx'
 useStrict(true) // not allowed to change any state outside of an action
 
-export default class Wrapper extends Component {
-  state = { fontsAreLoaded: false }
+const db = new Database()
 
-  async componentWillMount () {
-    await Expo.Font.loadAsync({
+export default class Wrapper extends Component {
+  state = {
+    fontsAreLoaded: false,
+    dbLoaded: false
+  }
+
+  componentWillMount () {
+    Expo.Font.loadAsync({
       'Roboto_medium': require('native-base/Fonts/Roboto_medium.ttf')
-    })
-    this.setState({fontsAreLoaded: true})
+    }).then(() => this.setState({fontsAreLoaded: true}))
+
+    db.init()
+      .then(() => db.getConfig())
+      .then(config => {
+        stores.config = config
+        this.setState({dbLoaded: true})
+      })
   }
 
   render () {
-    if (this.state.fontsAreLoaded) {
-      return <AppContainer />
+    if (this.state.fontsAreLoaded && this.state.dbLoaded) {
+      return (
+        <Provider {...stores}>
+          <AppContainer />
+        </Provider>
+      )
     }
     return <Expo.AppLoading />
   }

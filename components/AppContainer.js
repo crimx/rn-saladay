@@ -24,8 +24,7 @@ import theme from '../style/native-base-theme-vars'
 import colors from '../style/colors'
 
 import { observable, action } from 'mobx'
-import { Provider, observer } from 'mobx-react'
-import stores from '../stores'
+import { observer } from 'mobx-react'
 
 import SwipeableViews from 'react-swipeable-views-native'
 import GoalPage from './GoalPage'
@@ -43,38 +42,36 @@ export default class AppContainer extends Component {
   render () {
     return (
       <View style={{flex: 1, backgroundColor: colors.darkPrimary}}>
-        <Provider {...stores}>
-          <StyleProvider style={getTheme(theme)}>
-            <Container style={{backgroundColor: '#fff', marginTop: Expo.Constants.statusBarHeight}}>
-              <Header hasSegment>
-                <Left>
-                  <Button transparent>
-                    <Icon name='menu' />
-                  </Button>
-                </Left>
-                <Body>
-                  <Segment>
-                    <Button first
-                      active={this.pageIndex === 0}
-                      onPressIn={action(() => (this.pageIndex = 0))}
-                    ><Text>清单</Text></Button>
-                    <Button last
-                      active={this.pageIndex === 1}
-                      onPressIn={action(() => (this.pageIndex = 1))}
-                    ><Text>日程</Text></Button>
-                  </Segment>
-                </Body>
-                <Right />
-              </Header>
-              <Content>
-                <SwipeableViews disabled index={this.pageIndex}>
-                  <GoalPage />
-                  <CalendarPage />
-                </SwipeableViews>
-              </Content>
-            </Container>
-          </StyleProvider>
-        </Provider>
+        <StyleProvider style={getTheme(theme)}>
+          <Container style={{backgroundColor: '#fff', marginTop: Expo.Constants.statusBarHeight}}>
+            <Header hasSegment>
+              <Left>
+                <Button transparent>
+                  <Icon name='menu' />
+                </Button>
+              </Left>
+              <Body>
+                <Segment>
+                  <Button first
+                    active={this.pageIndex === 0}
+                    onPressIn={action(() => (this.pageIndex = 0))}
+                  ><Text>清单</Text></Button>
+                  <Button last
+                    active={this.pageIndex === 1}
+                    onPressIn={action(() => (this.pageIndex = 1))}
+                  ><Text>日程</Text></Button>
+                </Segment>
+              </Body>
+              <Right />
+            </Header>
+            <Content>
+              <SwipeableViews disabled index={this.pageIndex}>
+                <GoalPage />
+                <CalendarPage />
+              </SwipeableViews>
+            </Content>
+          </Container>
+        </StyleProvider>
       </View>
     )
   }
