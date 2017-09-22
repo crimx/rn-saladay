@@ -24,52 +24,43 @@ import theme from '../style/native-base-theme-vars'
 import colors from '../style/colors'
 
 import { observable, action } from 'mobx'
-import { observer } from 'mobx-react'
+import { inject, observer } from 'mobx-react'
 
-import SwipeableViews from 'react-swipeable-views-native'
 import GoalPage from './GoalPage'
 import CalendarPage from './CalendarPage'
 
 import {
   Body, Button, Container, Content,
-  Header, Icon, Left, Right, Segment, StyleProvider, Text
+  Header, Icon, Left, Right, StyleProvider, Tab, Tabs, Text, Title
 } from 'native-base'
 
+@inject('appStore')
 @observer
 export default class AppContainer extends Component {
-  @observable pageIndex = 0
-
   render () {
     return (
-      <View style={{flex: 1, backgroundColor: colors.darkPrimary}}>
+      <View style={{flex: 1, backgroundColor: colors.primaryDark}}>
         <StyleProvider style={getTheme(theme)}>
           <Container style={{backgroundColor: '#fff', marginTop: Expo.Constants.statusBarHeight}}>
-            <Header hasSegment>
+            <Header hasTabs>
               <Left>
                 <Button transparent>
                   <Icon name='menu' />
                 </Button>
               </Left>
               <Body>
-                <Segment>
-                  <Button first
-                    active={this.pageIndex === 0}
-                    onPressIn={action(() => (this.pageIndex = 0))}
-                  ><Text>清单</Text></Button>
-                  <Button last
-                    active={this.pageIndex === 1}
-                    onPressIn={action(() => (this.pageIndex = 1))}
-                  ><Text>日程</Text></Button>
-                </Segment>
+                <Title>{this.props.appStore.title}</Title>
               </Body>
               <Right />
             </Header>
-            <Content>
-              <SwipeableViews disabled index={this.pageIndex}>
+            <Tabs initialPage={0}>
+              <Tab heading='清单'>
                 <GoalPage />
+              </Tab>
+              <Tab heading='日程'>
                 <CalendarPage />
-              </SwipeableViews>
-            </Content>
+              </Tab>
+            </Tabs>
           </Container>
         </StyleProvider>
       </View>
