@@ -135,16 +135,16 @@ export default {
   footerDefaultBg: colors.primary,
 
   // FooterTab
-  tabBarTextColor: '#c8eaa0',
+  tabBarTextColor: colors.primaryLight,
   tabBarTextSize: platform === 'ios' ? 14 : 11,
   activeTab: '#fff',
-  sTabBarActiveTextColor: '#8bc34a',
+  sTabBarActiveTextColor: colors.primaryLightDark,
   tabBarActiveTextColor: '#fff',
   tabActiveBgColor: undefined,
 
   // Tab
   tabDefaultBg: colors.primary,
-  topTabBarTextColor: '#b3c7f9',
+  topTabBarTextColor: colors.primaryLight,
   topTabBarActiveTextColor: '#fff',
   topTabActiveBgColor: undefined,
   topTabBarBorderColor: '#fff',
