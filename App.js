@@ -22,7 +22,7 @@ import Database from './dao'
 
 import stores from './stores'
 import { Provider } from 'mobx-react'
-import { useStrict } from 'mobx'
+import { observable, useStrict } from 'mobx'
 useStrict(true) // not allowed to change any state outside of an action
 
 const db = new Database()
@@ -41,7 +41,7 @@ export default class Wrapper extends Component {
     db.init()
       .then(() => db.getConfig())
       .then(config => {
-        stores.config = config
+        stores.appConfig = observable(config)
         this.setState({dbLoaded: true})
       })
   }
