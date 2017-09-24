@@ -18,19 +18,18 @@
 import React, { Component } from 'react'
 import Expo from 'expo'
 import AppContainer from './components/AppContainer'
-import Database from './dao'
+import Dao from './dao'
+import Configs from './dao/configs'
 
 import stores from './stores'
 import { Provider } from 'mobx-react'
 import { observable, useStrict } from 'mobx'
 useStrict(true) // not allowed to change any state outside of an action
 
-const db = new Database()
-
 export default class Wrapper extends Component {
   state = {
     fontsAreLoaded: false,
-    dbLoaded: false
+    daoLoaded: false
   }
 
   componentWillMount () {
@@ -38,8 +37,9 @@ export default class Wrapper extends Component {
       'Roboto_medium': require('native-base/Fonts/Roboto_medium.ttf')
     }).then(() => this.setState({fontsAreLoaded: true}))
 
-    db.init()
-      .then(() => db.getConfig())
+    const dao = new Dao()
+    dao.init()
+      .then(() => new Configs(dao.db).get())
       .then(config => {
         stores.appConfig = observable(config)
         this.setState({dbLoaded: true})
