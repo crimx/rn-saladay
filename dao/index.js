@@ -16,110 +16,88 @@
  */
 
 import { SQLite } from 'expo'
-import defaultConfig from '../appconfig.json'
 
-export default class Database {
+import Tables from './tables'
+import GoalLists from './goal_lists'
+import GoalItems from './goal_items'
+import ScheduleItems from './schedule_items'
+
+export default class Dao {
   constructor () {
+    this.isFresh = false
     this.db = SQLite.openDatabase('saladay.db')
-    console.log('Database')
   }
 
   init () {
-    return this.initTables()
+    // return this.tables.drop()
+    //   .then(() => this.tables.list())
+    let tables = new Tables(this.db)
+    return tables.list()
+      .then(tbs => {
+        if (tbs.indexOf('configs') === -1) {
+          this.isFresh = true
+        }
+      })
+      .then(() => tables.init())
+      .then(() => {
+        if (this.isFresh) { return this.initData() }
+      })
+      .catch(err => console.error(err))
   }
 
   /**
+   * Insert default data
    * @return Promise
    */
-  initTables () {
-    const queries = [
-      `CREATE TABLE IF NOT EXISTS configs (
-        config_key TEXT NOT NULL,
-        config_value TEXT NOT NULL,
-        config_version INT NOT NULL,
-        PRIMARY KEY(config_key, config_version)
-      );`,
-      `CREATE TABLE IF NOT EXISTS goal_lists (
-        list_id INT PRIMARY KEY,
-        list_title TEXT NOT NULL
-      );`,
-      `CREATE TABLE IF NOT EXISTS goal_items (
-        goal_date INT PRIMARY KEY,
-        goal_title TEXT NOT NULL,
-        goal_note TEXT,
-        goal_color TEXT NOT NULL,
-        goal_done INT NOT NULL,
-        due INT,
-        list_id INT NOT NULL,
-          FOREIGN KEY (list_id) REFERENCES goal_lists(list_id)
-      );`,
-      `CREATE TABLE IF NOT EXISTS schedule_items (
-        schedule_date TEXT PRIMARY KEY,
-        schedule_index INT NOT NULL,
-        goal_id INT,
-          FOREIGN KEY (goal_id) REFERENCES goal_items(goal_date)
-      );`
+  initData () {
+    const goalListsData = [
+      {
+        list_id: '1506167013325',
+        list_title: 'Family',
+        list_color: '#f64747',
+        list_order: 0
+      },
+      {
+        list_id: '1506167013326',
+        list_title: 'Health',
+        list_color: '#2abb9b',
+        list_order: 1
+      },
+      {
+        list_id: '1506167013327',
+        list_title: 'Reading',
+        list_color: '#3a539b',
+        list_order: 2
+      }
     ]
 
-    return new Promise((resolve, reject) => {
-      this.db.transaction(tx => {
-        queries.forEach(q => {
-          tx.executeSql(q, [])
-        })
-      }, reject, resolve)
-    })
-  }
-
-  /**
-   * @return Promise<config> A promsie with the APP config
-   */
-  getConfig () {
-    return new Promise((resolve, reject) => {
-      this.db.transaction(tx => {
-        tx.executeSql(`
-          SELECT config_value
-          FROM configs
-          WHERE config_key = "app"
-          ORDER BY config_version DESC
-          LIMIT 1;`,
-          [],
-          (_, {rows}) => {
-            let result = defaultConfig
-            if (rows.length < 1) {
-              this.setConfig(defaultConfig)
-            } else {
-              try {
-                result = JSON.parse(rows.item(0).config_value)
-              } catch (err) {
-                return reject('Error getConfig: ' + err.toString())
-              }
-            }
-            resolve(result)
-          }
-        )
-      }, reject)
-    })
-  }
-
-  /**
-   * @param {object} config - serializable
-   * @return Promse
-   */
-  setConfig (config) {
-    return new Promise((resolve, reject) => {
-      try {
-        var configStr = JSON.stringify(config)
-      } catch (err) {
-        return reject('Error setConfig: ' + err.toString())
+    const goalItemsData = [
+      {
+        goal_date: '1506275781528',
+        goal_title: 'Call mom',
+        goal_done: false,
+        goal_order: 0,
+        list_id: '1506167013325'
+      },
+      {
+        goal_date: '1506275781529',
+        goal_title: 'Work out',
+        goal_color: '#16a085',
+        goal_done: false,
+        goal_order: 0,
+        list_id: '1506167013326'
+      },
+      {
+        goal_date: '1506275781530',
+        goal_title: 'Jogging',
+        goal_color: '#3fc380',
+        goal_done: false,
+        goal_order: 1,
+        list_id: '1506167013326'
       }
-      this.db.transaction(tx => {
-        tx.executeSql(`
-          REPLACE INTO configs (config_key, config_value, config_version)
-          VALUES ("app", ?, ?)
-          `,
-          [configStr, config.version || 0]
-        )
-      }, reject, resolve)
-    })
+    ]
+
+    new GoalLists(this.db).insert(goalListsData)
+      .then(() => new GoalItems(this.db).insert(goalItemsData))
   }
 }
