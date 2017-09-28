@@ -17,7 +17,7 @@
 
 import React, { Component } from 'react'
 import Expo from 'expo'
-import AppContainer from './components/AppContainer'
+import AppNavigation from './components/AppNavigation'
 import Dao from './dao'
 import Configs from './dao/configs'
 
@@ -50,7 +50,7 @@ export default class Wrapper extends Component {
     if (this.state.fontsAreLoaded && this.state.dbLoaded) {
       return (
         <Provider {...stores}>
-          <AppContainer />
+          <AppNavigation />
         </Provider>
       )
     }
