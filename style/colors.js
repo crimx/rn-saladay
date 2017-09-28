@@ -16,10 +16,10 @@
  */
 
 export default {
-  primary: '#5caf9e',
-  primaryLight: '#c2ebe3',
-  primaryLightDark: '#8cd0c3',
-  primaryDark: '#3a9482',
+  primary: '#009688',
+  primaryLight: '#42b2a6',
+  primaryLightDark: '#20a294',
+  primaryDark: '#00776a',
 
   grey: '#e7e9e9',
   greyLight: '#f2f4f5',
