@@ -143,12 +143,12 @@ export default {
   tabActiveBgColor: undefined,
 
   // Tab
-  tabDefaultBg: colors.primary,
-  topTabBarTextColor: colors.primaryLight,
-  topTabBarActiveTextColor: '#fff',
+  tabDefaultBg: '#fff',
+  topTabBarTextColor: colors.greyDark,
+  topTabBarActiveTextColor: colors.primary,
   topTabActiveBgColor: undefined,
   topTabBarBorderColor: '#fff',
-  topTabBarActiveBorderColor: '#fff',
+  topTabBarActiveBorderColor: colors.primary,
 
   // Header
   toolbarBtnColor: '#fff',
