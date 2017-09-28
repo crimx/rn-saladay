@@ -16,7 +16,7 @@
  */
 
 import React, { Component } from 'react'
-import { View } from 'react-native'
+import { View, StyleSheet } from 'react-native'
 import Expo from 'expo'
 
 import getTheme from '../native-base-theme/components'
@@ -31,17 +31,17 @@ import CalendarPage from './CalendarPage'
 
 import {
   Body, Button, Container, Content,
-  Header, Icon, Left, Right, StyleProvider, Tab, Tabs, Text, Title
+  Header, Icon, Left, Right, StyleProvider, Tab, TabHeading, Tabs, Text, Title
 } from 'native-base'
 
-@inject('appStore')
+@inject('globalStore')
 @observer
 export default class AppContainer extends Component {
   render () {
     return (
-      <View style={{flex: 1, backgroundColor: colors.primaryDark}}>
+      <View style={styles.statusBar}>
         <StyleProvider style={getTheme(theme)}>
-          <Container style={{backgroundColor: '#fff', marginTop: Expo.Constants.statusBarHeight}}>
+          <Container style={styles.container}>
             <Header hasTabs>
               <Left>
                 <Button transparent>
@@ -49,11 +49,11 @@ export default class AppContainer extends Component {
                 </Button>
               </Left>
               <Body>
-                <Title>{this.props.appStore.title}</Title>
+                <Title>{this.props.globalStore.title}</Title>
               </Body>
               <Right />
             </Header>
-            <Tabs initialPage={0}>
+            <Tabs initialPage={0} tabBarUnderlineStyle={{height: 2}}>
               <Tab heading='清单'>
                 <GoalPage />
               </Tab>
@@ -67,3 +67,17 @@ export default class AppContainer extends Component {
     )
   }
 }
+
+const styles = StyleSheet.create({
+  statusBar: {
+    flex: 1,
+    backgroundColor: colors.primary
+  },
+  container: {
+    backgroundColor: '#fff',
+    marginTop: Expo.Constants.statusBarHeight
+  },
+  tabHeading: {
+    padding: 0
+  }
+})
