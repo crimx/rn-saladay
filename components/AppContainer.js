@@ -23,15 +23,14 @@ import getTheme from '../native-base-theme/components'
 import theme from '../style/native-base-theme-vars'
 import colors from '../style/colors'
 
-import { observable, action } from 'mobx'
 import { inject, observer } from 'mobx-react'
 
-import GoalPage from './GoalPage'
-import CalendarPage from './CalendarPage'
+import GoalLists from './GoalLists'
+import Calendar from './Calendar'
 
 import {
-  Body, Button, Container, Content,
-  Header, Icon, Left, Right, StyleProvider, Tab, TabHeading, Tabs, Text, Title
+  Body, Button, Container,
+  Header, Icon, Left, Right, StyleProvider, Tab, Tabs, Title
 } from 'native-base'
 
 @inject('globalStore')
@@ -55,10 +54,10 @@ export default class AppContainer extends Component {
             </Header>
             <Tabs initialPage={0} tabBarUnderlineStyle={{height: 2}}>
               <Tab heading='清单'>
-                <GoalPage />
+                <GoalLists />
               </Tab>
               <Tab heading='日程'>
-                <CalendarPage />
+                <Calendar />
               </Tab>
             </Tabs>
           </Container>
