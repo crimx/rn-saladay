@@ -23,7 +23,7 @@ export default class NavigationStore {
   constructor () {
     BackHandler.addEventListener('hardwareBackPress', () => {
       if (this.navigationState.index === 0) return false
-      this.dispatchNavigation({ type: NavigationActions.BACK })
+      this.dispatchNavigation(NavigationActions.back())
       return true
     })
   }
