@@ -21,7 +21,7 @@ import AppNavigation from './components/AppNavigation'
 import Dao from './dao'
 import Configs from './dao/configs'
 
-import stores from './stores'
+import Stores from './stores'
 import { Provider } from 'mobx-react'
 import { observable, useStrict } from 'mobx'
 useStrict(true) // not allowed to change any state outside of an action
@@ -32,6 +32,8 @@ export default class Wrapper extends Component {
     daoLoaded: false
   }
 
+  @observable appConfig = {}
+
   componentWillMount () {
     Expo.Font.loadAsync({
       'Roboto_medium': require('native-base/Fonts/Roboto_medium.ttf')
@@ -41,13 +43,15 @@ export default class Wrapper extends Component {
     dao.init()
       .then(() => new Configs(dao.db).get())
       .then(config => {
-        stores.appConfig = observable(config)
+        this.appConfig = observable(config)
         this.setState({dbLoaded: true})
       })
   }
 
   render () {
     if (this.state.fontsAreLoaded && this.state.dbLoaded) {
+      let stores = new Stores()
+      stores.appConfig = this.appConfig
       return (
         <Provider {...stores}>
           <AppNavigation />

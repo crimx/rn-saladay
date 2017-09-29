@@ -19,8 +19,8 @@ import NavigationStore from './NavigationStore'
 import GlobalStore from './GlobalStore'
 import GoalStore from './GoalStore'
 
-export default {
-  navigationStore: new NavigationStore(),
-  globalStore: new GlobalStore(),
-  goalStore: new GoalStore()
+export default class Stores {
+  navigationStore = new NavigationStore()
+  globalStore = new GlobalStore()
+  goalStore = new GoalStore()
 }
