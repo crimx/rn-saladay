@@ -29,9 +29,9 @@ export default class Dao {
   }
 
   init () {
-    // return this.tables.drop()
-    //   .then(() => this.tables.list())
     let tables = new Tables(this.db)
+    // return tables.drop()
+    //   .then(() => tables.list())
     return tables.list()
       .then(tbs => {
         if (tbs.indexOf('configs') === -1) {
@@ -75,7 +75,6 @@ export default class Dao {
       {
         goal_date: '1506275781528',
         goal_title: 'Call mom',
-        goal_done: false,
         goal_order: 0,
         list_id: '1506167013325'
       },
@@ -83,7 +82,6 @@ export default class Dao {
         goal_date: '1506275781529',
         goal_title: 'Work out',
         goal_color: '#16a085',
-        goal_done: false,
         goal_order: 0,
         list_id: '1506167013326'
       },
@@ -91,7 +89,6 @@ export default class Dao {
         goal_date: '1506275781530',
         goal_title: 'Jogging',
         goal_color: '#3fc380',
-        goal_done: false,
         goal_order: 1,
         list_id: '1506167013326'
       }

@@ -14,7 +14,7 @@ export function pickle (data, keys) {
       } else if (typeof data[k] === 'boolean') {
         newData[k] = Number(data[k])
       } else if (data[k] == null) {
-        newData[k] = null
+        newData[k] = ''
       } else if (typeof data[k] === 'object') {
         newData[k] = JSON.stringify(data[k])
       } else {

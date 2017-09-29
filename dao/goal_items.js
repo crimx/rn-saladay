@@ -55,4 +55,20 @@ export default class GoalItems {
       }, reject, resolve)
     })
   }
+
+  selectUndoneItemsFromList (listId) {
+    return new Promise((resolve, reject) => {
+      this.db.transaction(tx => {
+        tx.executeSql(
+          `SELECT * FROM goal_items
+          WHERE
+            list_id = ? AND goal_done = ''
+          ORDER BY
+            goal_order`,
+          [listId],
+          (_, {rows}) => resolve(rows._array)
+        )
+      }, reject, resolve)
+    })
+  }
 }
