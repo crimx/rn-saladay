@@ -18,13 +18,25 @@
 import { observable, action } from 'mobx'
 
 import GoalLists from '../dao/goal_lists'
+import GoalItems from '../dao/goal_items'
+
+const daoGoalLists = new GoalLists()
+const daoGoalItems = new GoalItems()
 
 export default class GoalStore {
   @observable goalLists = []
+  @observable goalUndoneItems = observable.map()
 
   constructor () {
-    new GoalLists().getAll()
+    daoGoalLists.getAll()
       .then(action(lists => {
+        lists.forEach(({list_id: listId}) => {
+          this.goalUndoneItems.set(listId, [])
+          daoGoalItems.selectUndoneItemsFromList(listId)
+            .then(action(items => {
+              this.goalUndoneItems.set(listId, items)
+            }))
+        })
         this.goalLists = lists
       }))
   }
