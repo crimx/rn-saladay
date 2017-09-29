@@ -45,17 +45,17 @@ export default class Tables {
         goal_note TEXT,
         goal_steps TEXT,
         goal_color TEXT,
-        goal_done INT NOT NULL,
-        goal_due INT,
+        goal_done TEXT,
+        goal_due TEXT,
         goal_order INT NOT NULL,
-        list_id INT NOT NULL,
+        list_id TEXT NOT NULL,
 
         FOREIGN KEY (list_id) REFERENCES goal_lists(list_id)
       );`,
       `CREATE TABLE IF NOT EXISTS schedule_items (
         schedule_date TEXT PRIMARY KEY,
         schedule_index INT NOT NULL,
-        goal_id INT,
+        goal_id TEXT,
 
         FOREIGN KEY (goal_id) REFERENCES goal_items(goal_date)
       );`
