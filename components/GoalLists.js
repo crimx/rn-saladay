@@ -30,7 +30,10 @@ export default class GoalPage extends Component {
     return this.props.goalStore.goalLists.map(list =>
       <ListItem key={list.list_order} icon button
         onPress={() => this.props.navigationStore.dispatchNavigation(
-          NavigationActions.navigate({ routeName: 'GoalItems' })
+          NavigationActions.navigate({
+            routeName: 'GoalItems',
+            params: { listMeta: list }
+          })
         )}
       >
         <Left style={styles.listIconWrap}>
@@ -40,7 +43,7 @@ export default class GoalPage extends Component {
           <Text>{list.list_title}</Text>
         </Body>
         <Right>
-          <Icon name='md-arrow-round-forward' style={styles.listIconForward} />
+          <Text>{this.props.goalStore.goalUndoneItems.get(list.list_id).length}</Text>
         </Right>
       </ListItem>
     )
