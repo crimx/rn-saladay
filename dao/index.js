@@ -75,6 +75,7 @@ export default class Dao {
       {
         goal_date: '1506275781528',
         goal_title: 'Call mom',
+        goal_color: '#f64747',
         goal_order: 0,
         list_id: '1506167013325'
       },
