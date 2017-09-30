@@ -21,7 +21,7 @@ import { StyleSheet } from 'react-native'
 import { NavigationActions } from 'react-navigation'
 import { computed } from 'mobx'
 import { inject, observer } from 'mobx-react'
-import { Body, Icon, Left, List, ListItem, Right, Text } from 'native-base'
+import { Body, Fab, Icon, Left, List, ListItem, Right, Text, View } from 'native-base'
 
 @inject('goalStore', 'navigationStore')
 @observer
@@ -51,7 +51,21 @@ export default class GoalPage extends Component {
 
   render () {
     return (
-      <List button>{this.$goalLists}</List>
+      <View style={{flex: 1}}>
+        <List button>{this.$goalLists}</List>
+        <Fab active
+          style={{backgroundColor: colors.primary}}
+          position='bottomRight'
+          onPress={() => this.props.navigationStore.dispatchNavigation(
+            NavigationActions.navigate({
+              routeName: 'ListDetail',
+              params: { addMode: true }
+            })
+          )}
+        >
+          <Icon name='md-add' />
+        </Fab>
+      </View>
     )
   }
 }
