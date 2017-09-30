@@ -71,4 +71,34 @@ export default class GoalItems {
       }, reject, resolve)
     })
   }
+
+  /**
+  * @param {object} data
+  * @return Promse
+  */
+  updateItem (goalItem) {
+    return new Promise((resolve, reject) => {
+      if (!goalItem.goal_date) { return reject('updateItem: Missing PK goal_date') }
+
+      let keys = [
+        'goal_title',
+        'goal_note',
+        'goal_steps',
+        'goal_color',
+        'goal_done',
+        'goal_due',
+        'goal_order',
+        'list_id'
+      ].filter(k => goalItem[k] !== undefined)
+
+      this.db.transaction(tx => {
+        tx.executeSql(
+          `UPDATE goal_items
+          SET ${keys.map(k => k + ' = ?').join(',')}
+          WHERE goal_date = ?`,
+          [...keys.map(k => goalItem[k]), goalItem.goal_date]
+        )
+      }, reject, resolve)
+    })
+  }
 }

@@ -21,10 +21,14 @@ import { observer, inject } from 'mobx-react'
 
 import AppContainer from './AppContainer'
 import GoalItems from './GoalItems'
+import GoalDetail from './GoalDetail'
+import ListDetail from './ListDetail'
 
 const AppNavigator = StackNavigator({
   App: { screen: AppContainer },
-  GoalItems: { screen: GoalItems }
+  GoalItems: { screen: GoalItems },
+  GoalDetail: { screen: GoalDetail },
+  ListDetail: { screen: ListDetail }
 }, {
   initialRouteName: 'App',
   headerMode: 'none'

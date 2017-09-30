@@ -26,6 +26,7 @@ const daoGoalItems = new GoalItems()
 export default class GoalStore {
   @observable goalLists = []
   @observable goalUndoneItems = observable.map()
+  @observable unsaveGoalItems = observable.map()
 
   constructor () {
     daoGoalLists.getAll()
@@ -38,6 +39,57 @@ export default class GoalStore {
             }))
         })
         this.goalLists = lists
+      }))
+  }
+
+  addGoalItem (goalItem) {
+    const listId = goalItem.list_id
+    let item = this.unsaveGoalItems.get(listId)
+    return daoGoalItems.insert(item)
+      .then(action(() => {
+        this.unsaveGoalItems.delete(listId)
+        if (!item.goal_done) {
+          this.goalUndoneItems.get(listId).push(item)
+        } else {
+          let doneItems = this.goalDoneItems.get(listId)
+          if (doneItems) {
+            doneItems.push(item)
+          }
+        }
+      }))
+  }
+
+  updateGoalItem (goalItem) {
+    return daoGoalItems.updateItem(goalItem)
+      .then(action(() => {
+        // Keep ViewModel sync with database
+        const undoneList = this.goalUndoneItems.get(goalItem.list_id)
+        const index = goalItem.goal_order
+        const oldItem = undoneList[index]
+        if (oldItem && oldItem.goal_date === goalItem.goal_date) {
+          if (goalItem.goal_done) {
+            // delete the old item and reorder undoneList
+            undoneList.splice(index, 1)
+            return Promise.all(
+              undoneList.slice(index)
+                .map((el, i) => {
+                  el.goal_order = index + i
+                  return daoGoalItems.updateItem({
+                    goal_date: el.goal_date,
+                    goal_order: el.goal_order
+                  })
+                })
+            )
+          } else {
+            // replace the item
+            undoneList[index] = goalItem
+          }
+        } else {
+          // no match in undone list
+          if (!goalItem.goal_done) {
+            undoneList.push(goalItem)
+          } // else { otherwise ignored, done lists are always pulled from database when needed}
+        }
       }))
   }
 }
