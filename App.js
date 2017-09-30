@@ -17,6 +17,8 @@
 
 import React, { Component } from 'react'
 import Expo from 'expo'
+import { Root } from 'native-base'
+
 import AppNavigation from './components/AppNavigation'
 import Dao from './dao'
 import Configs from './dao/configs'
@@ -53,9 +55,11 @@ export default class Wrapper extends Component {
       let stores = new Stores()
       stores.appConfig = this.appConfig
       return (
-        <Provider {...stores}>
-          <AppNavigation />
-        </Provider>
+        <Root>
+          <Provider {...stores}>
+            <AppNavigation />
+          </Provider>
+        </Root>
       )
     }
     return <Expo.AppLoading />
