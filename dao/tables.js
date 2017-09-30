@@ -51,6 +51,7 @@ export default class Tables {
         list_id TEXT NOT NULL,
 
         FOREIGN KEY (list_id) REFERENCES goal_lists(list_id)
+        CONSTRAINT goal_order_unique UNIQUE (list_id, goal_order)
       );`,
       `CREATE TABLE IF NOT EXISTS schedule_items (
         schedule_date TEXT PRIMARY KEY,
