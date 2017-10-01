@@ -19,9 +19,10 @@ import React, { Component } from 'react'
 import { View, StyleSheet } from 'react-native'
 import { NavigationActions } from 'react-navigation'
 import Expo from 'expo'
+import autobind from 'autobind-decorator'
 
 import { inject, observer } from 'mobx-react'
-import { computed, toJS } from 'mobx'
+import { toJS } from 'mobx'
 
 import colors from '../style/colors'
 
@@ -30,30 +31,67 @@ import {
   Header, Icon, Left, Right, List, ListItem, Text, Title
 } from 'native-base'
 
+@inject('navigationStore')
+@observer
+class GoalItem extends Component {
+  @autobind
+  _toGoalDetail () {
+    this.props.navigationStore.dispatchNavigation(
+      NavigationActions.navigate({
+        routeName: 'GoalDetail',
+        params: { goalMeta: toJS(this.props.item) } // clone
+      })
+    )
+  }
+
+  render () {
+    let {item} = this.props
+    return (
+      <ListItem button onPress={this._toGoalDetail}>
+        <CheckBox checked={!!item.goal_done} color={item.goal_color} style={styles.checkBox} />
+        <Body>
+          <Text>{item.goal_title}</Text>
+        </Body>
+        <Right>
+          <Icon name='md-arrow-forward' style={styles.toDetail} />
+        </Right>
+      </ListItem>
+    )
+  }
+}
+
 @inject('goalStore')
 @observer
 export default class GoalItems extends Component {
-  @computed get $goalItems () {
+  @autobind
+  _addItem () {
     let {listMeta} = this.props.navigation.state.params
-    return this.props.goalStore.goalUndoneItems.get(listMeta.list_id)
-      .map(item =>
-        <ListItem key={item.goal_date} button
-          onPress={() => this.props.navigation.dispatch(
-            NavigationActions.navigate({
-              routeName: 'GoalDetail',
-              params: { goalMeta: toJS(item) } // clone
-            })
-          )}
-        >
-          <CheckBox checked={!!item.goal_done} color={item.goal_color} style={styles.checkBox} />
-          <Body>
-            <Text>{item.goal_title}</Text>
-          </Body>
-          <Right>
-            <Icon name='md-arrow-forward' style={styles.toDetail} />
-          </Right>
-        </ListItem>
-      )
+    const {unsaveGoalItems} = this.props.goalStore
+    let unsaveItem = unsaveGoalItems.get(listMeta.list_id)
+    if (!unsaveItem) {
+      unsaveItem = {
+        goal_color: listMeta.list_color,
+        goal_order: this.props.goalStore.goalUndoneItems.get(listMeta.list_id).length,
+        list_id: listMeta.list_id
+      }
+    }
+    unsaveItem.goal_date = String(Date.now())
+    unsaveGoalItems.set(listMeta.list_id, unsaveItem)
+
+    this.props.navigation.dispatch(
+      NavigationActions.navigate({
+        routeName: 'GoalDetail',
+        params: {
+          goalMeta: unsaveGoalItems.get(listMeta.list_id),
+          addMode: true
+        }
+      })
+    )
+  }
+
+  @autobind
+  goBack () {
+    this.props.navigation.dispatch(NavigationActions.back())
   }
 
   render () {
@@ -63,7 +101,7 @@ export default class GoalItems extends Component {
         <Container style={styles.container}>
           <Header style={{backgroundColor: listMeta.list_color}}>
             <Left>
-              <Button transparent onPress={() => this.props.navigation.dispatch(NavigationActions.back())}>
+              <Button transparent onPress={this.goBack}>
                 <Icon name='md-arrow-back' />
               </Button>
             </Left>
@@ -74,34 +112,15 @@ export default class GoalItems extends Component {
           </Header>
           <View style={{flex: 1}}>
             <Content>
-              <List>{this.$goalItems}</List>
+              <List>{
+                this.props.goalStore.goalUndoneItems.get(listMeta.list_id)
+                  .map(item => <GoalItem key={item.goal_date} item={item} />)
+              }</List>
             </Content>
             <Fab active
               style={{backgroundColor: listMeta.list_color}}
               position='bottomRight'
-              onPress={() => {
-                const {unsaveGoalItems} = this.props.goalStore
-                let unsaveItem = unsaveGoalItems.get(listMeta.list_id)
-                if (!unsaveItem) {
-                  unsaveItem = {
-                    goal_color: listMeta.list_color,
-                    goal_order: this.props.goalStore.goalUndoneItems.get(listMeta.list_id).length,
-                    list_id: listMeta.list_id
-                  }
-                }
-                unsaveItem.goal_date = String(Date.now())
-                unsaveGoalItems.set(listMeta.list_id, unsaveItem)
-
-                this.props.navigation.dispatch(
-                  NavigationActions.navigate({
-                    routeName: 'GoalDetail',
-                    params: {
-                      goalMeta: unsaveGoalItems.get(listMeta.list_id),
-                      addMode: true
-                    }
-                  })
-                )
-              }}
+              onPress={this._addItem}
             >
               <Icon name='md-add' />
             </Fab>

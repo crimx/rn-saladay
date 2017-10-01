@@ -19,23 +19,27 @@ import colors from '../style/colors'
 import React, { Component } from 'react'
 import { StyleSheet } from 'react-native'
 import { NavigationActions } from 'react-navigation'
-import { computed } from 'mobx'
 import { inject, observer } from 'mobx-react'
 import { Body, Fab, Icon, Left, List, ListItem, Right, Text, View } from 'native-base'
+import autobind from 'autobind-decorator'
 
 @inject('goalStore', 'navigationStore')
 @observer
-export default class GoalPage extends Component {
-  @computed get $goalLists () {
-    return this.props.goalStore.goalLists.map(list =>
-      <ListItem key={list.list_order} icon button
-        onPress={() => this.props.navigationStore.dispatchNavigation(
-          NavigationActions.navigate({
-            routeName: 'GoalItems',
-            params: { listMeta: list }
-          })
-        )}
-      >
+class GoalListItem extends Component {
+  @autobind
+  _toGoalItems () {
+    this.props.navigationStore.dispatchNavigation(
+      NavigationActions.navigate({
+        routeName: 'GoalItems',
+        params: { listMeta: this.props.list }
+      })
+    )
+  }
+
+  render () {
+    const {list} = this.props
+    return (
+      <ListItem icon button onPress={this._toGoalItems}>
         <Left style={styles.listIconWrap}>
           <Icon name='ios-list' style={{fontSize: 35, color: list.list_color}} />
         </Left>
@@ -48,20 +52,33 @@ export default class GoalPage extends Component {
       </ListItem>
     )
   }
+}
+
+@inject('goalStore', 'navigationStore')
+@observer
+export default class GoalLists extends Component {
+  @autobind
+  _addList () {
+    this.props.navigationStore.dispatchNavigation(
+      NavigationActions.navigate({
+        routeName: 'ListDetail',
+        params: { addMode: true }
+      })
+    )
+  }
 
   render () {
     return (
       <View style={{flex: 1}}>
-        <List button>{this.$goalLists}</List>
+        <List button>{
+          this.props.goalStore.goalLists.map(list =>
+            <GoalListItem key={list.list_order} list={list} />
+          )
+        }</List>
         <Fab active
           style={{backgroundColor: colors.primary}}
           position='bottomRight'
-          onPress={() => this.props.navigationStore.dispatchNavigation(
-            NavigationActions.navigate({
-              routeName: 'ListDetail',
-              params: { addMode: true }
-            })
-          )}
+          onPress={this._addList}
         >
           <Icon name='md-add' />
         </Fab>

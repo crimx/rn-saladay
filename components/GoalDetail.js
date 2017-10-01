@@ -19,6 +19,7 @@ import React, { Component } from 'react'
 import { View, StyleSheet, Keyboard } from 'react-native'
 import { NavigationActions } from 'react-navigation'
 import Expo from 'expo'
+import autobind from 'autobind-decorator'
 
 import { inject, observer } from 'mobx-react'
 import { observable, action } from 'mobx'
@@ -37,6 +38,7 @@ export default class GoalItems extends Component {
   @observable goalMeta = this.props.navigation.state.params.goalMeta
   @observable addMode = this.props.navigation.state.params.addMode
 
+  @autobind
   saveItem () {
     Keyboard.dismiss()
     if (!this.goalMeta.goal_title) {
@@ -72,13 +74,32 @@ export default class GoalItems extends Component {
       }))
   }
 
+  @autobind
+  chooseNewColor () {
+    this.props.navigation.dispatch(
+      NavigationActions.navigate({
+        routeName: 'ColorPicker',
+        params: {
+          meta: this.goalMeta,
+          key: 'goal_color',
+          title: 'Choose New Color'
+        }
+      })
+    )
+  }
+
+  @autobind
+  goBack () {
+    this.props.navigation.dispatch(NavigationActions.back())
+  }
+
   render () {
     return (
       <View style={{flex: 1, backgroundColor: this.goalMeta.goal_color}}>
         <Container style={styles.container}>
           <Header style={{backgroundColor: this.goalMeta.goal_color}}>
             <Left>
-              <Button transparent onPress={() => this.props.navigation.dispatch(NavigationActions.back())}>
+              <Button transparent onPress={this.goBack}>
                 <Icon name='md-arrow-back' />
               </Button>
             </Left>
@@ -86,7 +107,7 @@ export default class GoalItems extends Component {
               <Title>{this.goalMeta.goal_title || (this.addMode ? 'New Goal' : '')}</Title>
             </Body>
             <Right>
-              <Button transparent onPress={() => this.saveItem()}>
+              <Button transparent onPress={this.saveItem}>
                 <Text>Save</Text>
               </Button>
             </Right>
@@ -114,12 +135,7 @@ export default class GoalItems extends Component {
               <Item stackedLabel>
                 <Label>Color</Label>
                 <Button style={[styles.colorButton, {backgroundColor: this.goalMeta.goal_color}]}
-                  onPress={() => this.props.navigation.dispatch(
-                    NavigationActions.navigate({
-                      routeName: 'ColorPicker',
-                      params: {meta: this.goalMeta, key: 'goal_color'}
-                    })
-                  )}
+                  onPress={this.chooseNewColor}
                 />
               </Item>
               <Item stackedLabel last>

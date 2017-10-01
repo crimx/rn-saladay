@@ -17,6 +17,7 @@
 
 import React, {PureComponent} from 'react'
 import {Input} from 'native-base'
+import autobind from 'autobind-decorator'
 
 export default class MultilineInput extends PureComponent {
   constructor (props) {
@@ -26,12 +27,9 @@ export default class MultilineInput extends PureComponent {
       value: this.props.value || ''
     }
     this.lastOnSubmitEditing = 0
-
-    this._bindOnSelectionChange = this._onSelectionChange.bind(this)
-    this._bindOnChangeText = this._onChangeText.bind(this)
-    this._bindOnSubmitEditing = this._onSubmitEditing.bind(this)
   }
 
+  @autobind
   _onSubmitEditing () {
     const time = Date.now()
     // Prevent 2 newlines for some Android versions, because they dispatch onSubmitEditing twice
@@ -53,11 +51,13 @@ export default class MultilineInput extends PureComponent {
     this._onChangeText(newText)
   }
 
+  @autobind
   _onChangeText (value) {
     this.setState({ value })
     this.props.onChangeText && this.props.onChangeText(value)
   }
 
+  @autobind
   _onSelectionChange (event) {
     this.setState({selection: event.nativeEvent.selection})
     this.props.onSelectionChange && this.props.onSelectionChange(event)
@@ -81,9 +81,9 @@ export default class MultilineInput extends PureComponent {
         blurOnSubmit={false}
         selection={this.state.selection}
         value={this.state.value}
-        onSelectionChange={this._bindOnSelectionChange}
-        onChangeText={this._bindOnChangeText}
-        onSubmitEditing={this._bindOnSubmitEditing}
+        onSelectionChange={this._onSelectionChange}
+        onChangeText={this._onChangeText}
+        onSubmitEditing={this._onSubmitEditing}
       />
     )
   }

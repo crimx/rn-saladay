@@ -17,6 +17,7 @@
 
 import React, {PureComponent} from 'react'
 import MultilineInput from './MultilineInput'
+import autobind from 'autobind-decorator'
 
 export default class AutoExpandInput extends PureComponent {
   constructor (props) {
@@ -24,8 +25,6 @@ export default class AutoExpandInput extends PureComponent {
     this.state = {
       height: 0
     }
-
-    this._bindOnContentSizeChange = this._onContentSizeChange.bind(this)
   }
 
   componentWillReceiveProps (props) {
@@ -34,10 +33,10 @@ export default class AutoExpandInput extends PureComponent {
     }
   }
 
+  @autobind
   _onContentSizeChange (event) {
     const newHeight = event.nativeEvent.contentSize.height
     if (this.state.height !== newHeight) {
-      console.log('height changed', this.state.height, newHeight)
       this.setState({height: newHeight})
     }
     this.props.onContentSizeChange && this.props.onContentSizeChange(event)
@@ -53,7 +52,7 @@ export default class AutoExpandInput extends PureComponent {
     return (
       <MultilineInput
         {...otherProps}
-        onContentSizeChange={this._bindOnContentSizeChange}
+        onContentSizeChange={this._onContentSizeChange}
         style={[{height: this.state.height + 30}, style]}
       />
     )

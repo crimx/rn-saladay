@@ -21,6 +21,7 @@ import { NavigationActions } from 'react-navigation'
 import Expo from 'expo'
 import { action, computed, observable } from 'mobx'
 import { inject, observer } from 'mobx-react'
+import autobind from 'autobind-decorator'
 
 import {ColorPicker as Picker} from 'react-native-color-picker'
 import {
@@ -43,7 +44,11 @@ class ColorButton extends Component {
     this.props.navigationStore.dispatchNavigation(
       NavigationActions.navigate({
         routeName: 'ColorPicker',
-        params: {meta: this.props.appConfigs.config.colors, key: this.props.index}
+        params: {
+          meta: this.props.appConfigs.config.colors,
+          key: this.props.index,
+          title: 'Replace Color Box'
+        }
       })
     )
   }
@@ -63,7 +68,7 @@ class ColorButton extends Component {
 @inject('appConfigs')
 @observer
 export default class ColorPicker extends Component {
-  @observable colors = []
+  @observable colors = this.props.appConfigs.config.colors.slice(0, 16)
   @computed get $colorButtons () {
     return this.colors.map((color, i) => (
       <ColorButton
@@ -85,19 +90,24 @@ export default class ColorPicker extends Component {
     meta[key] = color
   }
 
+  @autobind
+  goBack () {
+    this.props.navigation.dispatch(NavigationActions.back())
+  }
+
   render () {
-    const {meta, key} = this.props.navigation.state.params
+    const {meta, key, title} = this.props.navigation.state.params
     return (
       <View style={{flex: 1, backgroundColor: meta[key]}}>
         <Container style={styles.container}>
           <Header style={{backgroundColor: meta[key]}}>
             <Left>
-              <Button transparent onPress={() => this.props.navigation.dispatch(NavigationActions.back())}>
+              <Button transparent onPress={this.goBack}>
                 <Icon name='md-arrow-back' />
               </Button>
             </Left>
             <Body>
-              <Title>Color Picker</Title>
+              <Title>{title || 'Color Picker'}</Title>
             </Body>
             <Right />
           </Header>
