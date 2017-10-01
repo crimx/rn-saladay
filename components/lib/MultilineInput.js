@@ -26,6 +26,10 @@ export default class MultilineInput extends PureComponent {
       value: this.props.value || ''
     }
     this.lastOnSubmitEditing = 0
+
+    this._bindOnSelectionChange = this._onSelectionChange.bind(this)
+    this._bindOnChangeText = this._onChangeText.bind(this)
+    this._bindOnSubmitEditing = this._onSubmitEditing.bind(this)
   }
 
   _onSubmitEditing () {
@@ -77,9 +81,9 @@ export default class MultilineInput extends PureComponent {
         blurOnSubmit={false}
         selection={this.state.selection}
         value={this.state.value}
-        onSelectionChange={this._onSelectionChange.bind(this)}
-        onChangeText={this._onChangeText.bind(this)}
-        onSubmitEditing={this._onSubmitEditing.bind(this)}
+        onSelectionChange={this._bindOnSelectionChange}
+        onChangeText={this._bindOnChangeText}
+        onSubmitEditing={this._bindOnSubmitEditing}
       />
     )
   }
