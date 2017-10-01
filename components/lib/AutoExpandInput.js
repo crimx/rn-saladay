@@ -24,16 +24,22 @@ export default class AutoExpandInput extends PureComponent {
     this.state = {
       height: 0
     }
+
+    this._bindOnContentSizeChange = this._onContentSizeChange.bind(this)
   }
 
   componentWillReceiveProps (props) {
     if (!props.value) {
-      this.setState({height: 130})
+      this.setState({height: 20})
     }
   }
 
   _onContentSizeChange (event) {
-    this.setState({height: event.nativeEvent.contentSize.height})
+    const newHeight = event.nativeEvent.contentSize.height
+    if (this.state.height !== newHeight) {
+      console.log('height changed', this.state.height, newHeight)
+      this.setState({height: newHeight})
+    }
     this.props.onContentSizeChange && this.props.onContentSizeChange(event)
   }
 
@@ -47,7 +53,7 @@ export default class AutoExpandInput extends PureComponent {
     return (
       <MultilineInput
         {...otherProps}
-        onContentSizeChange={this._onContentSizeChange.bind(this)}
+        onContentSizeChange={this._bindOnContentSizeChange}
         style={[{height: this.state.height + 30}, style]}
       />
     )
