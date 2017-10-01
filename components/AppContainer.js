@@ -33,7 +33,6 @@ import {
   Header, Icon, Left, Right, StyleProvider, Tab, Tabs, Title
 } from 'native-base'
 
-@inject('globalStore')
 @observer
 export default class AppContainer extends Component {
   render () {
@@ -48,15 +47,15 @@ export default class AppContainer extends Component {
                 </Button>
               </Left>
               <Body>
-                <Title>{this.props.globalStore.title}</Title>
+                <Title>Saladay</Title>
               </Body>
               <Right />
             </Header>
             <Tabs initialPage={0} tabBarUnderlineStyle={{height: 2}}>
-              <Tab heading='清单'>
+              <Tab heading='Goals'>
                 <GoalLists />
               </Tab>
-              <Tab heading='日程'>
+              <Tab heading='Diary'>
                 <Calendar />
               </Tab>
             </Tabs>

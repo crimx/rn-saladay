@@ -39,9 +39,7 @@ export default class Dao {
         }
       })
       .then(() => tables.init())
-      .then(() => {
-        if (this.isFresh) { return this.initData() }
-      })
+      .then(() => this.isFresh && this.initData())
       .catch(err => console.error(err))
   }
 
@@ -95,7 +93,7 @@ export default class Dao {
       }
     ]
 
-    new GoalLists(this.db).insert(goalListsData)
+    return new GoalLists(this.db).insert(goalListsData)
       .then(() => new GoalItems(this.db).insert(goalItemsData))
   }
 }

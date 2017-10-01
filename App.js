@@ -21,12 +21,13 @@ import { Root } from 'native-base'
 
 import AppNavigation from './components/AppNavigation'
 import Dao from './dao'
-import Configs from './dao/configs'
 
 import Stores from './stores'
 import { Provider } from 'mobx-react'
 import { observable, useStrict } from 'mobx'
 useStrict(true) // not allowed to change any state outside of an action
+
+Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.PORTRAIT_UP)
 
 export default class Wrapper extends Component {
   state = {
@@ -34,7 +35,7 @@ export default class Wrapper extends Component {
     daoLoaded: false
   }
 
-  @observable appConfig = {}
+  @observable stores = {}
 
   componentWillMount () {
     Expo.Font.loadAsync({
@@ -43,20 +44,18 @@ export default class Wrapper extends Component {
 
     const dao = new Dao()
     dao.init()
-      .then(() => new Configs(dao.db).get())
-      .then(config => {
-        this.appConfig = observable(config)
-        this.setState({dbLoaded: true})
+      .then(() => {
+        this.stores = new Stores()
+        return this.stores.appConfigs.get()
       })
+      .then(() => this.setState({dbLoaded: true}))
   }
 
   render () {
     if (this.state.fontsAreLoaded && this.state.dbLoaded) {
-      let stores = new Stores()
-      stores.appConfig = this.appConfig
       return (
         <Root>
-          <Provider {...stores}>
+          <Provider {...this.stores}>
             <AppNavigation />
           </Provider>
         </Root>

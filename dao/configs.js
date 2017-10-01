@@ -55,15 +55,18 @@ export default class Configs {
   }
 
   /**
-   * @param {object} config - serializable
+   * @param {object|string} config - serializable
    * @return Promse
    */
   set (config) {
     return new Promise((resolve, reject) => {
-      try {
-        var configStr = JSON.stringify(config)
-      } catch (err) {
-        return reject('Error setConfig: ' + err.toString())
+      var configStr = config
+      if (typeof configStr !== 'string') {
+        try {
+          configStr = JSON.stringify(config)
+        } catch (err) {
+          return reject('Error setConfig: ' + err.toString())
+        }
       }
       this.db.transaction(tx => {
         tx.executeSql(`
