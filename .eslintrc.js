@@ -4,6 +4,9 @@ module.exports = {
   parserOptions: {
     sourceType: 'module'
   },
+  globals: {
+    __DEV__: true
+  },
   // https://github.com/feross/standard/blob/master/RULES.md#javascript-standard-style
   extends: ["standard", "standard-jsx"],
   // plugins: ['react'],
