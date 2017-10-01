@@ -16,7 +16,7 @@
  */
 
 import React, { Component } from 'react'
-import { View, StyleSheet } from 'react-native'
+import { View, StyleSheet, Keyboard } from 'react-native'
 import { NavigationActions } from 'react-navigation'
 import Expo from 'expo'
 
@@ -25,9 +25,10 @@ import { observable, action } from 'mobx'
 
 import colors from '../style/colors'
 
+import AutoExpandInput from './lib/AutoExpandInput'
 import {
   Body, Button, Container, Content, Form,
-  Header, Icon, Input, Item, Label, Left, Right, List, ListItem, Text, Title, Toast
+  Header, Icon, Input, Item, Label, Left, Right, Text, Title, Toast
 } from 'native-base'
 
 @inject('goalStore')
@@ -37,6 +38,7 @@ export default class GoalItems extends Component {
   @observable addMode = this.props.navigation.state.params.addMode
 
   saveItem () {
+    Keyboard.dismiss()
     if (!this.goalMeta.goal_title) {
       return Toast.show({
         text: 'Please enter title',
@@ -81,7 +83,7 @@ export default class GoalItems extends Component {
               </Button>
             </Left>
             <Body>
-              <Title>{this.addMode ? 'New Goal' : this.goalMeta.goal_title}</Title>
+              <Title>{this.goalMeta.goal_title || (this.addMode ? 'New Goal' : '')}</Title>
             </Body>
             <Right>
               <Button transparent onPress={() => this.saveItem()}>
@@ -90,32 +92,40 @@ export default class GoalItems extends Component {
             </Right>
           </Header>
           <Content>
-          <Form>
+            <Form>
               <Item stackedLabel>
                 <Label>Title</Label>
                 <Input
                   placeholder="What's your new goal?"
                   placeholderTextColor={colors.grey}
-                  selectionColor={this.goalMeta.goal_color}
                   value={this.goalMeta.goal_title}
                   onChangeText={action(text => (this.goalMeta.goal_title = text))}
                 />
               </Item>
               <Item stackedLabel>
                 <Label>Note</Label>
-                <Input multiline numberOfLines={5}
+                <AutoExpandInput
                   placeholder='Additional Note'
                   placeholderTextColor={colors.grey}
-                  selectionColor={this.goalMeta.goal_color}
                   value={this.goalMeta.goal_note}
                   onChangeText={action(text => (this.goalMeta.goal_note = text))}
+                />
+              </Item>
+              <Item stackedLabel>
+                <Label>Color</Label>
+                <Button style={[styles.colorButton, {backgroundColor: this.goalMeta.goal_color}]}
+                  onPress={() => this.props.navigation.dispatch(
+                    NavigationActions.navigate({
+                      routeName: 'ColorPicker',
+                      params: {meta: this.goalMeta, key: 'goal_color'}
+                    })
+                  )}
                 />
               </Item>
               <Item stackedLabel last>
                 <Label>Date Created</Label>
                 <Input editable={false}
                   style={{color: colors.greyDark}}
-                  selectionColor={this.goalMeta.goal_color}
                   value={new Date(Number(this.goalMeta.goal_date)).toLocaleString()}
                 />
               </Item>
@@ -131,5 +141,11 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
     marginTop: Expo.Constants.statusBarHeight
+  },
+  colorButton: {
+    marginTop: 15,
+    marginBottom: 15,
+    width: 40,
+    height: 35
   }
 })
