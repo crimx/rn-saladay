@@ -20,6 +20,7 @@ import React, { Component } from 'react'
 import { StyleSheet } from 'react-native'
 import { NavigationActions } from 'react-navigation'
 import { inject, observer } from 'mobx-react'
+import { toJS } from 'mobx'
 import { Body, Fab, Icon, Left, List, ListItem, Right, Text, View } from 'native-base'
 import autobind from 'autobind-decorator'
 
@@ -36,12 +37,22 @@ class GoalListItem extends Component {
     )
   }
 
+  @autobind
+  _toListDetail () {
+    this.props.navigationStore.dispatchNavigation(
+      NavigationActions.navigate({
+        routeName: 'ListDetail',
+        params: { listMeta: toJS(this.props.list) } // clone
+      })
+    )
+  }
+
   render () {
     const {list} = this.props
     return (
       <ListItem icon button onPress={this._toGoalItems}>
         <Left style={styles.listIconWrap}>
-          <Icon name='ios-list' style={{fontSize: 35, color: list.list_color}} />
+          <Icon name='ios-list' style={{fontSize: 35, color: list.list_color}} onPress={this._toListDetail} />
         </Left>
         <Body style={styles.listBody}>
           <Text>{list.list_title}</Text>
@@ -54,15 +65,24 @@ class GoalListItem extends Component {
   }
 }
 
-@inject('goalStore', 'navigationStore')
+@inject('appConfigs', 'goalStore', 'navigationStore')
 @observer
 export default class GoalLists extends Component {
   @autobind
   _addList () {
+    const {goalStore} = this.props
+    const {colors} = this.props.appConfigs.config
     this.props.navigationStore.dispatchNavigation(
       NavigationActions.navigate({
         routeName: 'ListDetail',
-        params: { addMode: true }
+        params: {
+          listMeta: {
+            list_id: String(Date.now()),
+            list_color: toJS(colors[Math.floor(Math.random() * colors.length)]),
+            list_order: goalStore.goalLists.length
+          },
+          addMode: true
+        }
       })
     )
   }

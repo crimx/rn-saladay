@@ -43,53 +43,90 @@ export default class GoalStore {
   }
 
   addGoalItem (goalItem) {
+    return daoGoalItems.insert(goalItem)
+      .then(() => this._addGoalItemSuccess(goalItem))
+  }
+
+  @action.bound
+  _addGoalItemSuccess (goalItem) {
     const listId = goalItem.list_id
-    let item = this.unsaveGoalItems.get(listId)
-    return daoGoalItems.insert(item)
-      .then(action(() => {
-        this.unsaveGoalItems.delete(listId)
-        if (!item.goal_done) {
-          this.goalUndoneItems.get(listId).push(item)
-        } else {
-          let doneItems = this.goalDoneItems.get(listId)
-          if (doneItems) {
-            doneItems.push(item)
-          }
-        }
-      }))
+    this.unsaveGoalItems.delete(listId)
+    if (!goalItem.goal_done) {
+      this.goalUndoneItems.get(listId).push(goalItem)
+    } else {
+      const doneItems = this.goalDoneItems.get(listId)
+      if (doneItems) {
+        doneItems.push(goalItem)
+      }
+    }
   }
 
   updateGoalItem (goalItem) {
     return daoGoalItems.updateItem(goalItem)
-      .then(action(() => {
-        // Keep ViewModel sync with database
-        const undoneList = this.goalUndoneItems.get(goalItem.list_id)
-        const index = goalItem.goal_order
-        const oldItem = undoneList[index]
-        if (oldItem && oldItem.goal_date === goalItem.goal_date) {
-          if (goalItem.goal_done) {
-            // delete the old item and reorder undoneList
-            undoneList.splice(index, 1)
-            return Promise.all(
-              undoneList.slice(index)
-                .map((el, i) => {
-                  el.goal_order = index + i
-                  return daoGoalItems.updateItem({
-                    goal_date: el.goal_date,
-                    goal_order: el.goal_order
-                  })
-                })
-            )
-          } else {
-            // replace the item
-            undoneList[index] = goalItem
-          }
-        } else {
-          // no match in undone list
-          if (!goalItem.goal_done) {
-            undoneList.push(goalItem)
-          } // else { otherwise ignored, done lists are always pulled from database when needed}
-        }
-      }))
+      .then(() => this._updateGoalItemSuccess(goalItem))
+  }
+
+  @action.bound
+  _updateGoalItemSuccess (goalItem) {
+    const undoneList = this.goalUndoneItems.get(goalItem.list_id)
+    const index = goalItem.goal_order
+    let oldItem = undoneList[index]
+    if (oldItem && oldItem.goal_date === goalItem.goal_date) {
+      undoneList[index] = goalItem
+    }
+  }
+
+  changeGoalItemDoneState (goalItem) {
+    return daoGoalItems.updateItem(goalItem)
+      .then(() => this._changeGoalItemDoneStateSuccess(goalItem))
+  }
+
+  @action.bound
+  _changeGoalItemDoneStateSuccess (goalItem) {
+    const undoneList = this.goalUndoneItems.get(goalItem.list_id)
+    const index = goalItem.goal_order
+    if (goalItem.goal_done) {
+      undoneList.push(goalItem)
+    } else {
+      // delete the old item and reorder undoneList
+      undoneList.splice(index, 1)
+      return Promise.all(
+        undoneList.slice(index)
+          .map((el, i) => {
+            el.goal_order = index + i
+            return daoGoalItems.updateItem({
+              goal_date: el.goal_date,
+              goal_order: el.goal_order
+            })
+          })
+      )
+    }
+  }
+
+  addList (listItem) {
+    return daoGoalLists.insert(listItem)
+      .then(() => this._addListSuccess(listItem))
+  }
+
+  @action.bound
+  _addListSuccess (listItem) {
+    this.goalLists.push(listItem)
+  }
+
+  updateList (listItem) {
+    const goalLists = this.goalLists
+    const index = listItem.list_order
+    const oldItem = goalLists[index]
+    if (oldItem && oldItem.list_id === listItem.list_id) {
+      return daoGoalLists.update(listItem)
+        .then(() => this._updateListSuccess(listItem))
+    } else {
+      return Promise.reject('updateList: listItem not exists')
+    }
+  }
+
+  @action.bound
+  _updateListSuccess (listItem) {
+    this.goalLists[listItem.list_order] = listItem
   }
 }

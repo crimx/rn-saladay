@@ -60,4 +60,25 @@ export default class GoalLists {
       }, reject)
     })
   }
+
+  update (listItem) {
+    return new Promise((resolve, reject) => {
+      if (!listItem.list_id) { return reject('updateListItem: Missing PK list_id') }
+
+      let keys = [
+        'list_title',
+        'list_color',
+        'list_order'
+      ].filter(k => listItem[k] !== undefined)
+
+      this.db.transaction(tx => {
+        tx.executeSql(
+          `UPDATE goal_lists
+          SET ${keys.map(k => k + ' = ?').join(',')}
+          WHERE list_id = ?`,
+          [...keys.map(k => listItem[k]), listItem.list_id]
+        )
+      }, reject, resolve)
+    })
+  }
 }
