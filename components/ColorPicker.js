@@ -34,12 +34,12 @@ const device = Dimensions.get('window')
 @inject('appConfigs', 'navigationStore')
 @observer
 class ColorButton extends Component {
-  @action.bound
+  @autobind
   onColorChange () {
     this.props.onColorChange && this.props.onColorChange(this.props.color)
   }
 
-  @action.bound
+  @autobind
   changeButtonColor () {
     this.props.navigationStore.dispatchNavigation(
       NavigationActions.navigate({
