@@ -16,13 +16,13 @@
  */
 
 import React, { Component } from 'react'
-import { View, StyleSheet, Keyboard } from 'react-native'
+import { View, StyleSheet, Keyboard, DatePickerAndroid, TimePickerAndroid } from 'react-native'
 import { NavigationActions } from 'react-navigation'
 import Expo from 'expo'
 import autobind from 'autobind-decorator'
 
 import { inject, observer } from 'mobx-react'
-import { observable, action } from 'mobx'
+import { observable, action, computed } from 'mobx'
 
 import colors from '../style/colors'
 
@@ -32,9 +32,133 @@ import {
   Header, Icon, Input, Item, Label, Left, Right, Text, Title, Toast
 } from 'native-base'
 
+@inject('navigationStore')
+@observer
+class GoalForm extends Component {
+  @computed get goalDue () {
+    if (this.props.goalMeta.goal_due) {
+      return new Date(Number(this.props.goalMeta.goal_due)).toLocaleString()
+    }
+    return 'None'
+  }
+  @computed get goalDate () {
+    return new Date(Number(this.props.goalMeta.goal_date)).toLocaleString()
+  }
+
+  @action.bound
+  changeTitle (text) {
+    this.props.goalMeta.goal_title = text
+  }
+
+  @action.bound
+  changeNote (text) {
+    this.props.goalMeta.goal_note = text
+  }
+
+  @action.bound
+  changeDue (dateTime) {
+    if (dateTime) {
+      this.props.goalMeta.goal_due = new Date(...dateTime).valueOf().toString()
+    }
+  }
+
+  @autobind
+  chooseNewColor () {
+    this.props.navigationStore.dispatchNavigation(
+      NavigationActions.navigate({
+        routeName: 'ColorPicker',
+        params: {
+          meta: this.props.goalMeta,
+          key: 'goal_color',
+          title: 'Choose New Color'
+        }
+      })
+    )
+  }
+
+  @autobind
+  chooseDue (date) {
+    DatePickerAndroid.open({date: date ? new Date(...date) : new Date()})
+      .then(({action, year, month, day}) => {
+        if (action !== DatePickerAndroid.dismissedAction) {
+          return [year, month, day]
+        }
+        return null
+      })
+      .then(date => {
+        if (date) {
+          return TimePickerAndroid.open()
+            .then(({action, hour, minute}) => {
+              if (action !== TimePickerAndroid.dismissedAction) {
+                return date.concat([hour, minute])
+              }
+              return Promise.reject(date) // Pass back to DatePicker
+            })
+        }
+        return null
+      })
+      .then(this.changeDue, this.chooseDue) // TimePicker Dismissed, back to DatePicker
+      .catch(err => {
+        Toast.show({
+          text: `Cannot open date picker`,
+          buttonText: 'OK',
+          type: 'danger',
+          duration: 2500
+        })
+        __DEV__ && console.error(err)
+      })
+  }
+
+  render () {
+    let {goalMeta} = this.props
+    return (
+      <Form>
+        <Item stackedLabel>
+          <Label>Title</Label>
+          <Input
+            placeholder="What's your new goal?"
+            placeholderTextColor={colors.grey}
+            value={goalMeta.goal_title}
+            onChangeText={this.changeTitle}
+          />
+        </Item>
+        <Item stackedLabel>
+          <Label>Note</Label>
+          <AutoExpandInput
+            placeholder='Additional Note'
+            placeholderTextColor={colors.grey}
+            value={goalMeta.goal_note}
+            onChangeText={this.changeNote}
+          />
+        </Item>
+        <Item stackedLabel>
+          <Label>Color</Label>
+          <Button style={[styles.colorButton, {backgroundColor: goalMeta.goal_color}]}
+            onPress={this.chooseNewColor}
+          />
+        </Item>
+        <Item stackedLabel>
+          <Label>Due</Label>
+          <Button full transparent style={styles.dueButton} onPress={this.chooseDue}>
+            <Text uppercase={false} style={styles.dueButtonText}>{this.goalDue}</Text>
+          </Button>
+        </Item>
+        <Item stackedLabel last>
+          <Label>Date Created</Label>
+          <Input editable={false}
+            style={{color: colors.greyDark}}
+            value={this.goalDate}
+          />
+        </Item>
+      </Form>
+    )
+  }
+}
+
 @inject('goalStore')
 @observer
-export default class GoalItems extends Component {
+export default class GoalDetail extends Component {
+  // Must needed. To make these two observable
   @observable goalMeta = this.props.navigation.state.params.goalMeta
   @observable addMode = this.props.navigation.state.params.addMode
 
@@ -62,7 +186,6 @@ export default class GoalItems extends Component {
         Toast.show({
           text: `Item ${this.addMode ? 'added' : 'updated'} successfully`,
           buttonText: 'OK',
-          style: {justifyContent: 'center'},
           duration: 2500
         })
         this.props.navigation.dispatch(NavigationActions.back())
@@ -72,20 +195,6 @@ export default class GoalItems extends Component {
         type: 'danger',
         duration: 2500
       }))
-  }
-
-  @autobind
-  chooseNewColor () {
-    this.props.navigation.dispatch(
-      NavigationActions.navigate({
-        routeName: 'ColorPicker',
-        params: {
-          meta: this.goalMeta,
-          key: 'goal_color',
-          title: 'Choose New Color'
-        }
-      })
-    )
   }
 
   @autobind
@@ -113,39 +222,7 @@ export default class GoalItems extends Component {
             </Right>
           </Header>
           <Content>
-            <Form>
-              <Item stackedLabel>
-                <Label>Title</Label>
-                <Input
-                  placeholder="What's your new goal?"
-                  placeholderTextColor={colors.grey}
-                  value={this.goalMeta.goal_title}
-                  onChangeText={action(text => (this.goalMeta.goal_title = text))}
-                />
-              </Item>
-              <Item stackedLabel>
-                <Label>Note</Label>
-                <AutoExpandInput
-                  placeholder='Additional Note'
-                  placeholderTextColor={colors.grey}
-                  value={this.goalMeta.goal_note}
-                  onChangeText={action(text => (this.goalMeta.goal_note = text))}
-                />
-              </Item>
-              <Item stackedLabel>
-                <Label>Color</Label>
-                <Button style={[styles.colorButton, {backgroundColor: this.goalMeta.goal_color}]}
-                  onPress={this.chooseNewColor}
-                />
-              </Item>
-              <Item stackedLabel last>
-                <Label>Date Created</Label>
-                <Input editable={false}
-                  style={{color: colors.greyDark}}
-                  value={new Date(Number(this.goalMeta.goal_date)).toLocaleString()}
-                />
-              </Item>
-            </Form>
+            <GoalForm goalMeta={this.goalMeta} />
           </Content>
         </Container>
       </View>
@@ -163,5 +240,14 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     width: 40,
     height: 35
+  },
+  dueButton: {
+    justifyContent: 'flex-start'
+  },
+  dueButtonText: {
+    color: '#000',
+    paddingLeft: 0,
+    fontFamily: 'Roboto',
+    fontSize: 17
   }
 })
