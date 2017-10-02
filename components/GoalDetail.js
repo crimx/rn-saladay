@@ -181,7 +181,7 @@ export default class GoalDetail extends Component {
       goalMeta.goal_order = goalStore.goalUndoneItems.get(goalMeta.list_id).length
     }
 
-    this.addMode ? goalStore.addGoalItem(goalMeta) : goalStore.updateGoalItem(goalMeta)
+    return (this.addMode ? goalStore.addGoalItem(goalMeta) : goalStore.updateGoalItem(goalMeta))
       .then(() => {
         Toast.show({
           text: `Item ${this.addMode ? 'added' : 'updated'} successfully`,

@@ -109,7 +109,7 @@ export default class ListDetail extends Component {
 
     const {goalStore} = this.props
     const listMeta = this.listMeta
-    this.addMode ? goalStore.addList(listMeta) : goalStore.updateList(listMeta)
+    return (this.addMode ? goalStore.addList(listMeta) : goalStore.updateList(listMeta))
       .then(() => {
         Toast.show({
           text: `List ${this.addMode ? 'added' : 'updated'} successfully`,

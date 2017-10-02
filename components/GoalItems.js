@@ -71,10 +71,10 @@ export default class GoalItems extends Component {
     if (!unsaveItem) {
       unsaveItem = {
         goal_color: listMeta.list_color,
-        goal_order: this.props.goalStore.goalUndoneItems.get(listMeta.list_id).length,
         list_id: listMeta.list_id
       }
     }
+    unsaveItem.goal_order = this.props.goalStore.goalUndoneItems.get(listMeta.list_id).length
     unsaveItem.goal_date = String(Date.now())
     unsaveGoalItems.set(listMeta.list_id, unsaveItem)
 
