@@ -101,4 +101,21 @@ export default class GoalItems {
       }, reject, resolve)
     })
   }
+
+  /**
+  * @param {object} data
+  * @return Promse
+  */
+  deleteItem (goalItem) {
+    return new Promise((resolve, reject) => {
+      if (!goalItem.goal_date) { return reject('deleteItem: Missing PK goal_date') }
+
+      this.db.transaction(tx => {
+        tx.executeSql(
+          'DELETE FROM goal_items WHERE goal_date = ?',
+          [goalItem.goal_date]
+        )
+      }, reject, resolve)
+    })
+  }
 }

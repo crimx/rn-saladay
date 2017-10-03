@@ -102,8 +102,6 @@ export default class GoalItems extends Component {
 
   render () {
     let {listMeta} = this.props.navigation.state.params
-    console.log(this.props.goalStore.goalUndoneItems.get(listMeta.list_id)
-      .map(item => item.goal_order))
     return (
       <View style={{flex: 1, backgroundColor: listMeta.list_color}}>
         <Container style={styles.container}>

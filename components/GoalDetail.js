@@ -16,7 +16,7 @@
  */
 
 import React, { Component } from 'react'
-import { View, StyleSheet, Keyboard, DatePickerAndroid, TimePickerAndroid } from 'react-native'
+import { View, StyleSheet, Keyboard, DatePickerAndroid, TimePickerAndroid, Alert } from 'react-native'
 import { NavigationActions } from 'react-navigation'
 import Expo from 'expo'
 import autobind from 'autobind-decorator'
@@ -35,35 +35,35 @@ import {
 @inject('navigationStore')
 @observer
 class GoalForm extends Component {
-  @computed get goalDue () {
+  @computed get _goalDue () {
     if (this.props.goalMeta.goal_due) {
       return new Date(Number(this.props.goalMeta.goal_due)).toLocaleString()
     }
     return 'None'
   }
-  @computed get goalDate () {
+  @computed get _goalDate () {
     return new Date(Number(this.props.goalMeta.goal_date)).toLocaleString()
   }
 
   @action.bound
-  changeTitle (text) {
+  _changeTitle (text) {
     this.props.goalMeta.goal_title = text
   }
 
   @action.bound
-  changeNote (text) {
+  _changeNote (text) {
     this.props.goalMeta.goal_note = text
   }
 
   @action.bound
-  changeDue (dateTime) {
+  _changeDue (dateTime) {
     if (dateTime) {
       this.props.goalMeta.goal_due = new Date(...dateTime).valueOf().toString()
     }
   }
 
   @autobind
-  chooseNewColor () {
+  _chooseNewColor () {
     this.props.navigationStore.dispatchNavigation(
       NavigationActions.navigate({
         routeName: 'ColorPicker',
@@ -77,7 +77,7 @@ class GoalForm extends Component {
   }
 
   @autobind
-  chooseDue (date) {
+  _chooseDue (date) {
     DatePickerAndroid.open({date: date ? new Date(...date) : new Date()})
       .then(({action, year, month, day}) => {
         if (action !== DatePickerAndroid.dismissedAction) {
@@ -97,13 +97,13 @@ class GoalForm extends Component {
         }
         return null
       })
-      .then(this.changeDue, this.chooseDue) // TimePicker Dismissed, back to DatePicker
+      .then(this._changeDue, this._chooseDue) // TimePicker Dismissed, back to DatePicker
       .catch(err => {
         Toast.show({
           text: `Cannot open date picker`,
           buttonText: 'OK',
           type: 'danger',
-          duration: 2500
+          duration: 2000
         })
         __DEV__ && console.error(err)
       })
@@ -119,7 +119,7 @@ class GoalForm extends Component {
             placeholder="What's your new goal?"
             placeholderTextColor={colors.grey}
             value={goalMeta.goal_title}
-            onChangeText={this.changeTitle}
+            onChangeText={this._changeTitle}
           />
         </Item>
         <Item stackedLabel>
@@ -128,26 +128,26 @@ class GoalForm extends Component {
             placeholder='Additional Note'
             placeholderTextColor={colors.grey}
             value={goalMeta.goal_note}
-            onChangeText={this.changeNote}
+            onChangeText={this._changeNote}
           />
         </Item>
         <Item stackedLabel>
           <Label>Color</Label>
           <Button style={[styles.colorButton, {backgroundColor: goalMeta.goal_color}]}
-            onPress={this.chooseNewColor}
+            onPress={this._chooseNewColor}
           />
         </Item>
         <Item stackedLabel>
           <Label>Due</Label>
-          <Button full transparent style={styles.dueButton} onPress={this.chooseDue}>
-            <Text uppercase={false} style={styles.dueButtonText}>{this.goalDue}</Text>
+          <Button full transparent style={styles.dueButton} onPress={this._chooseDue}>
+            <Text uppercase={false} style={styles.dueButtonText}>{this._goalDue}</Text>
           </Button>
         </Item>
         <Item stackedLabel last>
           <Label>Date Created</Label>
           <Input editable={false}
             style={{color: colors.greyDark}}
-            value={this.goalDate}
+            value={this._goalDate}
           />
         </Item>
       </Form>
@@ -163,14 +163,14 @@ export default class GoalDetail extends Component {
   @observable addMode = this.props.navigation.state.params.addMode
 
   @autobind
-  saveItem () {
+  _saveItem () {
     Keyboard.dismiss()
     if (!this.goalMeta.goal_title) {
       return Toast.show({
         text: 'Please enter title',
         buttonText: 'OK',
         type: 'warning',
-        duration: 2500
+        duration: 2000
       })
     }
 
@@ -186,7 +186,7 @@ export default class GoalDetail extends Component {
         Toast.show({
           text: `Item ${this.addMode ? 'added' : 'updated'} successfully`,
           buttonText: 'OK',
-          duration: 2500
+          duration: 2000
         })
         this.props.navigation.dispatch(NavigationActions.back())
       })
@@ -194,15 +194,46 @@ export default class GoalDetail extends Component {
         Toast.show({
           text: `Cannot ${this.addMode ? 'add' : 'update'} item`,
           type: 'danger',
-          duration: 2500
+          duration: 2000
         })
         __DEV__ && console.error(err)
       })
   }
 
   @autobind
-  goBack () {
+  _goBack () {
     this.props.navigation.dispatch(NavigationActions.back())
+  }
+
+  @action.bound
+  _deleteItem () {
+    Alert.alert(
+      'Warning',
+      `Delete Goal "${this.goalMeta.goal_title}"?`,
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'OK',
+          onPress: () => this.props.goalStore.deleteItem(this.goalMeta)
+            .then(() => {
+              Toast.show({
+                text: `Item deleted`,
+                buttonText: 'OK',
+                duration: 2000
+              })
+              this.props.navigation.dispatch(NavigationActions.back())
+            })
+            .catch(err => {
+              Toast.show({
+                text: `Cannot delete item`,
+                type: 'danger',
+                duration: 2000
+              })
+              __DEV__ && console.error(err)
+            })
+        }
+      ]
+    )
   }
 
   render () {
@@ -211,7 +242,7 @@ export default class GoalDetail extends Component {
         <Container style={styles.container}>
           <Header style={{backgroundColor: this.goalMeta.goal_color}}>
             <Left>
-              <Button transparent onPress={this.goBack}>
+              <Button transparent onPress={this._goBack}>
                 <Icon name='md-arrow-back' />
               </Button>
             </Left>
@@ -219,13 +250,18 @@ export default class GoalDetail extends Component {
               <Title>{this.goalMeta.goal_title || (this.addMode ? 'New Goal' : '')}</Title>
             </Body>
             <Right>
-              <Button transparent onPress={this.saveItem}>
+              <Button transparent onPress={this._saveItem}>
                 <Text>Save</Text>
               </Button>
             </Right>
           </Header>
           <Content>
             <GoalForm goalMeta={this.goalMeta} />
+            {this.addMode || (
+              <Button full danger onPress={this._deleteItem}>
+                <Text uppercase={false}>Delete Item</Text>
+              </Button>
+            )}
           </Content>
         </Container>
       </View>

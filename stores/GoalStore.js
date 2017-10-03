@@ -86,24 +86,38 @@ export default class GoalStore {
 
   @action.bound
   _changeGoalItemDoneStateSuccess (goalItem) {
+    if (goalItem.goal_done) {
+      this._deleteItemFromUndoneList(goalItem)
+    } else {
+      this.goalUndoneItems.get(goalItem.list_id).push(goalItem)
+    }
+  }
+
+  deleteItem (goalItem) {
+    return daoGoalItems.deleteItem(goalItem)
+      .then(() => {
+        if (!goalItem.goal_done) {
+          this._deleteItemFromUndoneList(goalItem)
+        }
+      })
+  }
+
+  @action.bound
+  _deleteItemFromUndoneList (goalItem) {
+    // delete the old item and reorder undoneList
     const undoneList = this.goalUndoneItems.get(goalItem.list_id)
     const index = goalItem.goal_order
-    if (goalItem.goal_done) {
-      // delete the old item and reorder undoneList
-      undoneList.splice(index, 1)
-      return Promise.all(
-        undoneList.slice(index)
-          .map((el, i) => {
-            el.goal_order = index + i
-            return daoGoalItems.updateItem({
-              goal_date: el.goal_date,
-              goal_order: el.goal_order
-            })
+    undoneList.splice(index, 1)
+    return Promise.all(
+      undoneList.slice(index)
+        .map((el, i) => {
+          el.goal_order = index + i
+          return daoGoalItems.updateItem({
+            goal_date: el.goal_date,
+            goal_order: el.goal_order
           })
-      )
-    } else {
-      undoneList.push(goalItem)
-    }
+        })
+    )
   }
 
   addList (listItem) {
