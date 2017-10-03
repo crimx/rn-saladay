@@ -77,7 +77,10 @@ export default class GoalStore {
   }
 
   changeGoalItemDoneState (goalItem) {
-    return daoGoalItems.updateItem(goalItem)
+    return daoGoalItems.updateItem({
+      goal_date: goalItem.goal_date,
+      goal_done: goalItem.goal_done
+    })
       .then(() => this._changeGoalItemDoneStateSuccess(goalItem))
   }
 
@@ -86,8 +89,6 @@ export default class GoalStore {
     const undoneList = this.goalUndoneItems.get(goalItem.list_id)
     const index = goalItem.goal_order
     if (goalItem.goal_done) {
-      undoneList.push(goalItem)
-    } else {
       // delete the old item and reorder undoneList
       undoneList.splice(index, 1)
       return Promise.all(
@@ -100,6 +101,8 @@ export default class GoalStore {
             })
           })
       )
+    } else {
+      undoneList.push(goalItem)
     }
   }
 

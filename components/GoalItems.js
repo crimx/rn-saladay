@@ -22,7 +22,7 @@ import Expo from 'expo'
 import autobind from 'autobind-decorator'
 
 import { inject, observer } from 'mobx-react'
-import { toJS } from 'mobx'
+import { toJS, action } from 'mobx'
 
 import colors from '../style/colors'
 
@@ -31,7 +31,7 @@ import {
   Header, Icon, Left, Right, List, ListItem, Text, Title
 } from 'native-base'
 
-@inject('navigationStore')
+@inject('goalStore', 'navigationStore')
 @observer
 class GoalItem extends Component {
   @autobind
@@ -44,11 +44,17 @@ class GoalItem extends Component {
     )
   }
 
+  @action.bound
+  _changeGoalDone () {
+    this.props.item.goal_done = this.props.item.goal_done ? '' : Date.now().toString()
+    this.props.goalStore.changeGoalItemDoneState(toJS(this.props.item))
+  }
+
   render () {
     let {item} = this.props
     return (
       <ListItem button onPress={this._toGoalDetail}>
-        <CheckBox checked={!!item.goal_done} color={item.goal_color} style={styles.checkBox} />
+        <CheckBox checked={!!item.goal_done} color={item.goal_color} style={styles.checkBox} onPress={this._changeGoalDone} />
         <Body>
           <Text>{item.goal_title}</Text>
         </Body>
@@ -96,6 +102,8 @@ export default class GoalItems extends Component {
 
   render () {
     let {listMeta} = this.props.navigation.state.params
+    console.log(this.props.goalStore.goalUndoneItems.get(listMeta.list_id)
+      .map(item => item.goal_order))
     return (
       <View style={{flex: 1, backgroundColor: listMeta.list_color}}>
         <Container style={styles.container}>
