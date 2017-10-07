@@ -22,13 +22,13 @@ import Expo from 'expo'
 import autobind from 'autobind-decorator'
 
 import { inject, observer } from 'mobx-react'
-import { toJS, action } from 'mobx'
+import { toJS, action, observable } from 'mobx'
 
 import colors from '../style/colors'
 
 import {
   Body, Button, CheckBox, Container, Content, Fab,
-  Header, Icon, Left, Right, List, ListItem, Text, Title
+  Header, Icon, Left, Right, List, ListItem, Spinner, Text, Title
 } from 'native-base'
 
 @inject('goalStore', 'navigationStore')
@@ -51,9 +51,9 @@ class GoalItem extends Component {
   }
 
   render () {
-    let {item} = this.props
+    let {item, index, lastIndex} = this.props
     return (
-      <ListItem button onPress={this._toGoalDetail}>
+      <ListItem button onPress={this._toGoalDetail} first={index === 0} last={index === lastIndex}>
         <CheckBox checked={!!item.goal_done} color={item.goal_color} style={styles.checkBox} onPress={this._changeGoalDone} />
         <Body>
           <Text>{item.goal_title}</Text>
@@ -63,6 +63,58 @@ class GoalItem extends Component {
         </Right>
       </ListItem>
     )
+  }
+}
+
+@inject('goalStore')
+@observer
+class DoneLists extends Component {
+  @observable isShow = false
+
+  @action.bound
+  _clearDoneList () {
+    this.props.goalStore.goalDoneItems.set(this.props.listMeta.list_id, null)
+  }
+
+  componentWillMount () {
+    this._clearDoneList()
+  }
+
+  componentWillUnmount () {
+    this._clearDoneList()
+  }
+
+  @action.bound
+  _loadDoneItems () {
+    this.isShow = true
+    this.props.goalStore.selectDoneItemsFromList(this.props.listMeta.list_id)
+  }
+
+  render () {
+    if (this.isShow) {
+      const doneList = this.props.goalStore.goalDoneItems.get(this.props.listMeta.list_id)
+      return (
+        <List>
+          <ListItem itemDivider>
+            <Text>Completed Goals</Text>
+          </ListItem>
+          {
+            doneList
+              ? doneList.map((item, i, arr) =>
+                <GoalItem key={item.goal_date} item={item} index={i} lastIndex={arr.length - 1} />
+              )
+              : <Spinner color={colors.primary} />
+          }
+        </List>
+      )
+    } else {
+      return (
+        <Button
+          block transparent
+          onPress={this._loadDoneItems}
+        ><Text uppercase={false} style={styles.btnShowDoneItems}>View completed goals</Text></Button>
+      )
+    }
   }
 }
 
@@ -120,8 +172,11 @@ export default class GoalItems extends Component {
             <Content>
               <List>{
                 this.props.goalStore.goalUndoneItems.get(listMeta.list_id)
-                  .map(item => <GoalItem key={item.goal_date} item={item} />)
+                  .map((item, i, arr) =>
+                    <GoalItem key={item.goal_date} item={item} index={i} lastIndex={arr.length - 1} />
+                  )
               }</List>
+              <DoneLists listMeta={listMeta} />
             </Content>
             <Fab active
               style={{backgroundColor: listMeta.list_color}}
@@ -148,5 +203,10 @@ const styles = StyleSheet.create({
   toDetail: {
     fontSize: 20,
     color: colors.grey
+  },
+  btnShowDoneItems: {
+    marginTop: 30,
+    fontSize: 14,
+    color: colors.greyDark
   }
 })

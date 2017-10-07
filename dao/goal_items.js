@@ -56,6 +56,10 @@ export default class GoalItems {
     })
   }
 
+  /**
+  * @param {string} listId
+  * @return Promse
+  */
   selectUndoneItemsFromList (listId) {
     return new Promise((resolve, reject) => {
       this.db.transaction(tx => {
@@ -73,7 +77,27 @@ export default class GoalItems {
   }
 
   /**
-  * @param {object} data
+  * @param {string} listId
+  * @return Promse
+  */
+  selectDoneItemsFromList (listId) {
+    return new Promise((resolve, reject) => {
+      this.db.transaction(tx => {
+        tx.executeSql(
+          `SELECT * FROM goal_items
+          WHERE
+            list_id = ? AND (NOT goal_done = '')
+          ORDER BY
+            goal_done DESC`,
+          [listId],
+          (_, {rows}) => resolve(rows._array)
+        )
+      }, reject, resolve)
+    })
+  }
+
+  /**
+  * @param {object} goalItem
   * @return Promse
   */
   updateItem (goalItem) {
@@ -103,7 +127,7 @@ export default class GoalItems {
   }
 
   /**
-  * @param {object} data
+  * @param {object} goalItem
   * @return Promse
   */
   deleteItem (goalItem) {

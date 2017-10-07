@@ -26,6 +26,7 @@ const daoGoalItems = new GoalItems()
 export default class GoalStore {
   @observable goalLists = []
   @observable goalUndoneItems = observable.map()
+  @observable goalDoneItems = observable.map()
   @observable unsaveGoalItems = observable.map()
 
   constructor () {
@@ -40,6 +41,13 @@ export default class GoalStore {
         })
         this.goalLists = lists
       }))
+  }
+
+  @action.bound
+  selectDoneItemsFromList (listId) {
+    this.goalDoneItems.set(listId, null)
+    return daoGoalItems.selectDoneItemsFromList(listId)
+      .then(action(items => this.goalDoneItems.set(listId, items)))
   }
 
   addGoalItem (goalItem) {
@@ -86,17 +94,28 @@ export default class GoalStore {
 
   @action.bound
   _changeGoalItemDoneStateSuccess (goalItem) {
+    const listId = goalItem.list_id
     if (goalItem.goal_done) {
       this._deleteItemFromUndoneList(goalItem)
     } else {
-      this.goalUndoneItems.get(goalItem.list_id).push(goalItem)
+      const undoneList = this.goalUndoneItems.get(listId)
+      goalItem.goal_order = undoneList.length
+      undoneList.push(goalItem)
+    }
+
+    if (this.goalDoneItems.has(listId)) {
+      this.selectDoneItemsFromList(listId)
     }
   }
 
   deleteItem (goalItem) {
     return daoGoalItems.deleteItem(goalItem)
       .then(() => {
-        if (!goalItem.goal_done) {
+        if (goalItem.goal_done) {
+          if (this.goalDoneItems.has(goalItem.list_id)) {
+            this.selectDoneItemsFromList(goalItem.list_id)
+          }
+        } else {
           this._deleteItemFromUndoneList(goalItem)
         }
       })
