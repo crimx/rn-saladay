@@ -73,7 +73,7 @@ class DoneLists extends Component {
 
   @action.bound
   _clearDoneList () {
-    this.props.goalStore.goalDoneItems.set(this.props.listMeta.list_id, null)
+    this.props.goalStore.goalDoneItems.delete(this.props.listMeta.list_id)
   }
 
   componentWillMount () {

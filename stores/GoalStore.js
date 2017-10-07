@@ -45,7 +45,7 @@ export default class GoalStore {
 
   @action.bound
   selectDoneItemsFromList (listId) {
-    this.goalDoneItems.set(listId, null)
+    this.goalDoneItems.delete(listId)
     return daoGoalItems.selectDoneItemsFromList(listId)
       .then(action(items => this.goalDoneItems.set(listId, items)))
   }
