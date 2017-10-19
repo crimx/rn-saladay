@@ -18,9 +18,11 @@
 import NavigationStore from './NavigationStore'
 import AppConfigs from './AppConfigs'
 import GoalStore from './GoalStore'
+import ScheduleStore from './ScheduleStore'
 
 export default class Stores {
   navigationStore = new NavigationStore()
   appConfigs = new AppConfigs()
   goalStore = new GoalStore()
+  scheduleStore = new ScheduleStore()
 }

@@ -23,10 +23,10 @@ import getTheme from '../native-base-theme/components'
 import theme from '../style/native-base-theme-vars'
 import colors from '../style/colors'
 
-import { inject, observer } from 'mobx-react'
+import { observer } from 'mobx-react'
 
 import GoalLists from './GoalLists'
-import Calendar from './Calendar'
+import Schedule from './Schedule'
 
 import {
   Body, Button, Container,
@@ -55,8 +55,8 @@ export default class AppContainer extends Component {
               <Tab heading='Goals'>
                 <GoalLists />
               </Tab>
-              <Tab heading='Diary'>
-                <Calendar />
+              <Tab heading='Schedule'>
+                <Schedule />
               </Tab>
             </Tabs>
           </Container>

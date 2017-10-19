@@ -22,6 +22,8 @@ import GoalLists from './goal_lists'
 import GoalItems from './goal_items'
 import ScheduleItems from './schedule_items'
 
+import { getDate } from './helpers'
+
 export default class Dao {
   constructor () {
     this.isFresh = false
@@ -30,9 +32,9 @@ export default class Dao {
 
   init () {
     let tables = new Tables(this.db)
-    // return tables.drop()
-    //   .then(() => tables.list())
-    return tables.list()
+    return tables.drop()
+      .then(() => tables.list())
+    // return tables.list()
       .then(tbs => {
         if (tbs.indexOf('configs') === -1) {
           this.isFresh = true
@@ -93,7 +95,45 @@ export default class Dao {
       }
     ]
 
-    return new GoalLists(this.db).insert(goalListsData)
-      .then(() => new GoalItems(this.db).insert(goalItemsData))
+    const today = getDate(Date.now())
+    const yesterday = getDate(Date.now() - 24 * 3600 * 1000)
+    const scheduleItemsData = [
+      {
+        schedule_date: yesterday,
+        schedule_index: 8,
+        goal_id: '1506275781528'
+      },
+      {
+        schedule_date: yesterday,
+        schedule_index: 10,
+        goal_id: '1506275781529'
+      },
+      {
+        schedule_date: yesterday,
+        schedule_index: 11,
+        goal_id: '1506275781529'
+      },
+      {
+        schedule_date: today,
+        schedule_index: 10,
+        goal_id: '1506275781529'
+      },
+      {
+        schedule_date: today,
+        schedule_index: 11,
+        goal_id: '1506275781529'
+      },
+      {
+        schedule_date: today,
+        schedule_index: 12,
+        goal_id: '1506275781529'
+      }
+    ]
+
+    return Promise.all([
+      new GoalLists(this.db).insert(goalListsData),
+      new GoalItems(this.db).insert(goalItemsData),
+      new ScheduleItems(this.db).insert(scheduleItemsData)
+    ])
   }
 }

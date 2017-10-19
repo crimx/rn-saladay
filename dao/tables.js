@@ -53,10 +53,11 @@ export default class Tables {
         FOREIGN KEY (list_id) REFERENCES goal_lists(list_id)
       );`,
       `CREATE TABLE IF NOT EXISTS schedule_items (
-        schedule_date TEXT PRIMARY KEY,
+        schedule_date TEXT NOT NULL,
         schedule_index INT NOT NULL,
-        goal_id TEXT,
+        goal_id TEXT NOT NULL,
 
+        PRIMARY KEY(schedule_date, schedule_index),
         FOREIGN KEY (goal_id) REFERENCES goal_items(goal_date)
       );`
     ]

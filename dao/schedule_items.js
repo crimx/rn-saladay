@@ -16,9 +16,70 @@
  */
 
 import { SQLite } from 'expo'
+import { getDate } from './helpers'
 
 export default class ScheduleItems {
   constructor (db) {
     this.db = db || SQLite.openDatabase('saladay.db')
+  }
+
+  /**
+  * @param {object|object[]} data
+  * @return Promse
+  */
+  insert (data) {
+    let arr = Array.isArray(data) ? data : [data]
+
+    const keys = [
+      'schedule_date',
+      'schedule_index',
+      'goal_id'
+    ]
+
+    const sql = (
+      `INSERT INTO schedule_items
+        (${keys.join(',')})
+      VALUES
+        (${Array(keys.length).fill('?').join(',')});`
+    )
+
+    return new Promise((resolve, reject) => {
+      this.db.transaction(tx => {
+        arr.forEach(d => {
+          tx.executeSql(
+            sql,
+            keys.map(k => d[k])
+          )
+        })
+      }, reject, resolve)
+    })
+  }
+
+  /**
+  * @param {Date|string|number} time - Date instance or string in "YYYYDDMM" format or
+  * string/number representing milliseconds elapsed since the UNIX epoch
+  * @return Promse with an array of items
+  */
+  selectItemsByDate (time) {
+    return new Promise((resolve, reject) => {
+      this.db.transaction(tx => {
+        tx.executeSql(
+          `SELECT
+            schedule_date, schedule_index, goal_date, goal_color, goal_title
+          FROM
+            schedule_items
+          INNER JOIN
+            goal_items
+          ON
+          goal_items.goal_date = schedule_items.goal_id
+          WHERE
+            schedule_date = ?
+          ORDER BY
+            schedule_index`,
+          [getDate(time)],
+          (_, {rows}) => resolve(rows._array)
+        )
+      }, reject, resolve)
+    })
   }
 }
