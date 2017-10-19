@@ -29,7 +29,7 @@ export default class GoalItems {
   */
   insert (data) {
     let arr = Array.isArray(data) ? data : [data]
-    let keys = [
+    const keys = [
       'goal_date',
       'goal_title',
       'goal_note',
@@ -40,18 +40,22 @@ export default class GoalItems {
       'goal_order',
       'list_id'
     ]
-    let args = []
-    pickle(arr, keys).forEach(d => args.push(...keys.map(k => d[k])))
+
+    const sql = (
+      `INSERT INTO goal_items
+        (${keys.join(',')})
+      VALUES
+        (${Array(keys.length).fill('?').join(',')});`
+    )
 
     return new Promise((resolve, reject) => {
       this.db.transaction(tx => {
-        tx.executeSql(
-          `INSERT INTO goal_items
-            (${keys.join(',')})
-          VALUES
-            ${new Array(arr.length).fill('(?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',')};`,
-          args
-        )
+        pickle(arr, keys).forEach(d => {
+          tx.executeSql(
+            sql,
+            keys.map(k => d[k])
+          )
+        })
       }, reject, resolve)
     })
   }
