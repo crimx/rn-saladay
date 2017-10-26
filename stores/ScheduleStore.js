@@ -18,7 +18,7 @@
 import { observable, action } from 'mobx'
 import autobind from 'autobind-decorator'
 import ScheduleItems from '../dao/schedule_items'
-import { getDate, getDateTitle } from '../dao/helpers'
+import { getDate, getPrevDate, getNextDate, getDateTitle } from '../dao/helpers'
 
 const daoScheduleItems = new ScheduleItems()
 
@@ -46,7 +46,7 @@ export default class ScheduleStore {
   getItemsByDate (date) {
     date = getDate(date)
     if (this.schedules.has(date)) {
-      return this.schedules.get(date)
+      return Promise.resolve(this.schedules.get(date))
     }
 
     return daoScheduleItems.selectItemsByDate(date)
@@ -73,5 +73,36 @@ export default class ScheduleStore {
     }
 
     this.schedules.set(date, arr24)
+    return this.schedules.get(date)
+  }
+
+  @action.bound
+  _prependDate (prevDate) {
+    this.dates.unshift({
+      title: getDateTitle(prevDate),
+      date: prevDate
+    })
+  }
+
+  @autobind
+  prependDate () {
+    const prevDate = getPrevDate(this.dates[0].date)
+    return this.getItemsByDate(prevDate)
+      .then(() => this._prependDate(prevDate))
+  }
+
+  @action.bound
+  _appendDate (nextDate) {
+    this.dates.push({
+      title: getDateTitle(nextDate),
+      date: nextDate
+    })
+  }
+
+  @autobind
+  appendDate () {
+    const nextDate = getNextDate(this.dates[this.dates.length - 1].date)
+    return this.getItemsByDate(nextDate)
+      .then((x) => this._appendDate(nextDate))
   }
 }

@@ -46,7 +46,6 @@ export function pickle (data, keys) {
 }
 
 /**
- *
  * @param {Date|string|number} time - Date instance or string in "YYYYDDMM" format or
  * string/number representing milliseconds elapsed since the UNIX epoch
  * @return {string} date in "YYYYMMDD" format
@@ -63,8 +62,28 @@ export function getDate (time) {
   return moment(time).format('YYYYMMDD')
 }
 
+/**
+ * @param {string} date in "YYYYMMDD" format
+ * @return {string} next date in "YYYYMMDD" format
+ */
+export function getNextDate (date) {
+  return moment(date, 'YYYYMMDD').add(1, 'd').format('YYYYMMDD')
+}
+
+/**
+ * @param {string} date in "YYYYMMDD" format
+ * @return {string} previous date in "YYYYMMDD" format
+ */
+export function getPrevDate (date) {
+  return moment(date, 'YYYYMMDD').subtract(1, 'd').format('YYYYMMDD')
+}
+
+/**
+ * @param {string} date in "YYYYMMDD" format
+ * @return {string} date in "MMMM Do YYYY - dddd" format
+ */
 export function getDateTitle (date) {
-  return moment(date, 'YYYYMMDD').format('MMM Do YY')
+  return moment(date, 'YYYYMMDD').format('MMMM Do YYYY - dddd')
 }
 
 export default {
