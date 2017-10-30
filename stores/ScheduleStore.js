@@ -23,86 +23,96 @@ import { getDate, getPrevDate, getNextDate, getDateTitle } from '../dao/helpers'
 const daoScheduleItems = new ScheduleItems()
 
 export default class ScheduleStore {
-  @observable dates = [
-    getDate(Date.now() - 24 * 3600 * 1000), // yesterday
-    getDate(Date.now()), // today
-    getDate(Date.now() + 24 * 3600 * 1000) // tomorrow
-  ].map(d => ({
-    title: getDateTitle(d),
-    date: d
-  }))
-  @observable schedules = observable.shallowMap()
+  @observable.shallow schedules = observable.shallowArray()
+
+  isFetching = false
 
   constructor () {
-    this.dates.forEach(({date}) => this.getItemsByDate(date))
+    // reverse list for inverted SectionList
+    Promise.all(
+      [
+        getDate(Date.now() + 24 * 3600 * 1000), // tomorrow
+        getDate(Date.now()), // today
+        getDate(Date.now() - 24 * 3600 * 1000) // yesterday
+      ].map(this._getItemsByDate)
+    ).then(action(schedules => (this.schedules = schedules)))
   }
 
   /**
   * @param {Date|string|number} date - Date instance or string in "YYYYDDMM" format or
   * string/number representing milliseconds elapsed since the UNIX epoch
-  * @return Promse
+  * @return Promse with schedle object
   */
   @autobind
-  getItemsByDate (date) {
+  _getItemsByDate (date) {
     date = getDate(date)
-    if (this.schedules.has(date)) {
-      return Promise.resolve(this.schedules.get(date))
-    }
-
     return daoScheduleItems.selectItemsByDate(date)
-      .then(items => this._setSchedule(date, items))
+      .then(items => this._buildSchedule(date, items))
   }
 
-  @action.bound
-  _setSchedule (date, items) {
-    const arr48 = new Array(48)
-    items.forEach(item => (arr48[item.schedule_index] = item))
+  @autobind
+  _buildSchedule (date, items) {
+    const timeItems = new Array(48)
+    items && items.forEach(item => (timeItems[item.schedule_index] = item))
     for (let i = 0; i < 48; i++) {
-      if (!arr48[i]) {
-        arr48[i] = {
+      if (!timeItems[i]) {
+        timeItems[i] = {
           schedule_date: date,
           schedule_index: i,
-          goal_id: null
+          goal_id: null,
+          isSelected: false
         }
       }
     }
 
-    const arr24 = new Array(24)
+    // each row has two items
+    const timeRows = new Array(24)
     for (let i = 0, j = 0; i < 24; i += 1, j += 2) {
-      arr24[i] = [arr48[j], arr48[j + 1]]
+      timeRows[i] = {
+        key: timeItems[j].schedule_date + timeItems[j].schedule_index,
+        data: [timeItems[j], timeItems[j + 1]]
+      }
     }
 
-    this.schedules.set(date, arr24)
-    return this.schedules.get(date)
+    return {
+      data: timeRows,
+      key: date,
+      title: getDateTitle(date)
+    }
   }
 
   @action.bound
-  _prependDate (prevDate) {
-    this.dates.unshift({
-      title: getDateTitle(prevDate),
-      date: prevDate
-    })
+  _addPrevDate (schedule) {
+    this.schedules.push(schedule)
   }
 
   @autobind
-  prependDate () {
-    const prevDate = getPrevDate(this.dates[0].date)
-    return this.getItemsByDate(prevDate)
-      .then(() => this._prependDate(prevDate))
+  addPrevDate () {
+    if (this.isFetching) { return }
+    this.isFetching = true
+    const prevDate = getPrevDate(this.schedules[this.schedules.length - 1].key)
+    return this._getItemsByDate(prevDate)
+      .then(schedule => {
+        this._addPrevDate(schedule)
+        this.isFetching = false
+        return this.schedules[this.schedules.length - 1]
+      })
   }
 
   @action.bound
-  _appendDate (nextDate) {
-    this.dates.push({
-      title: getDateTitle(nextDate),
-      date: nextDate
-    })
+  _addNextDate (schedule) {
+    this.schedules.unshift(schedule)
   }
 
   @autobind
-  appendDate () {
-    const nextDate = getNextDate(this.dates[this.dates.length - 1].date)
-    return this.getItemsByDate(nextDate)
-      .then((x) => this._appendDate(nextDate))
+  addNextDate () {
+    if (this.isFetching) { return }
+    const nextDate = getNextDate(this.schedules[0].key)
+    return this._getItemsByDate(nextDate)
+      .then(schedule => {
+        this._addNextDate(schedule)
+        this.isFetching = false
+        return this.schedules[0]
+      })
   }
 }
