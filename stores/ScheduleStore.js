@@ -24,8 +24,11 @@ const daoScheduleItems = new ScheduleItems()
 
 export default class ScheduleStore {
   @observable.shallow schedules = observable.shallowArray()
+  @observable scheduleStates = observable.map()
 
-  isFetching = false
+  @observable selectedSchedules = new Set()
+
+  _isFetching = false
 
   constructor () {
     // reverse list for inverted SectionList
@@ -59,10 +62,15 @@ export default class ScheduleStore {
         timeItems[i] = {
           schedule_date: date,
           schedule_index: i,
-          goal_id: null,
-          isSelected: false
+          goal_id: null
         }
       }
+      this.scheduleStates.set(
+        timeItems[i].schedule_date + timeItems[i].schedule_index,
+        {
+          isSelected: false
+        }
+      )
     }
 
     // each row has two items
@@ -88,13 +96,13 @@ export default class ScheduleStore {
 
   @autobind
   addPrevDate () {
-    if (this.isFetching) { return }
-    this.isFetching = true
+    if (this._isFetching) { return }
+    this._isFetching = true
     const prevDate = getPrevDate(this.schedules[this.schedules.length - 1].key)
     return this._getItemsByDate(prevDate)
       .then(schedule => {
         this._addPrevDate(schedule)
-        this.isFetching = false
+        this._isFetching = false
         return this.schedules[this.schedules.length - 1]
       })
   }
@@ -106,13 +114,26 @@ export default class ScheduleStore {
 
   @autobind
   addNextDate () {
-    if (this.isFetching) { return }
+    if (this._isFetching) { return }
     const nextDate = getNextDate(this.schedules[0].key)
     return this._getItemsByDate(nextDate)
       .then(schedule => {
         this._addNextDate(schedule)
-        this.isFetching = false
+        this._isFetching = false
         return this.schedules[0]
       })
+  }
+
+  @action.bound
+  toggleItemSelection (id) {
+    const state = this.scheduleStates.get(id)
+    if (state.isSelected) {
+      state.isSelected = false
+      this.selectedSchedules.delete(id)
+    } else {
+      state.isSelected = true
+      this.selectedSchedules.add(id)
+    }
+    this.scheduleStates.set(id, state)
   }
 }

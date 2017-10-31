@@ -30,19 +30,28 @@ const halfDeviceWidth = deviceWidth / 2
 const sectionHeaderHeight = 40
 const sectionItemHeight = 45
 
+@inject('scheduleStore')
 @observer
 class TimeButton extends Component {
+  id = this.props.item.schedule_date + this.props.item.schedule_index
+
+  @autobind
+  _onPress () {
+    this.props.scheduleStore.toggleItemSelection(this.id)
+  }
+
   render () {
+    const itemState = this.props.scheduleStore.scheduleStates.get(this.id)
     return (
       <TouchableNativeFeedback
-        onPress={this.props.onPress}
+        onPress={this._onPress}
         background={TouchableNativeFeedback.Ripple('#fff')}
       >
         <View style={styles.listItemWrap}>
           <View style={[styles.listItem, {backgroundColor: this.props.item.goal_color || colors.grey}]}>
             <Text style={styles.listItemText}>{this.props.item.goal_title}</Text>
           </View>
-          {this.props.isSelected && <View style={styles.listItemMask} />}
+          {itemState.isSelected && <View style={styles.listItemMask} />}
         </View>
       </TouchableNativeFeedback>
     )
@@ -109,7 +118,7 @@ export default class Schedule extends Component {
         initialScrollIndex={25}
         initialNumToRender={15}
         getItemLayout={this._getItemLayout}
-        sections={[...this.props.scheduleStore.schedules]}
+        sections={this.props.scheduleStore.schedules.peek()}
         renderSectionHeader={this._renderSectionHeader}
         renderItem={this._renderItem}
         removeClippedSubviews
