@@ -15,16 +15,18 @@
  * along with Saladay.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { observable, action } from 'mobx'
+import { observable, action, computed } from 'mobx'
 import autobind from 'autobind-decorator'
 import ScheduleItems from '../dao/schedule_items'
 import { getDate, getPrevDate, getNextDate, getDateTitle } from '../dao/helpers'
+import colors from '../style/colors'
 
 const daoScheduleItems = new ScheduleItems()
 
 export default class ScheduleStore {
-  @observable.shallow schedules = observable.shallowArray()
-  @observable scheduleStates = observable.map()
+  @observable schedules = observable.map()
+  // plain objects for section list
+  @observable sections = observable.shallowArray()
 
   @observable selectedSchedules = new Set()
 
@@ -38,7 +40,7 @@ export default class ScheduleStore {
         getDate(Date.now()), // today
         getDate(Date.now() - 24 * 3600 * 1000) // yesterday
       ].map(this._getItemsByDate)
-    ).then(action(schedules => (this.schedules = schedules)))
+    ).then(action(sectionItems => this.sections.push(...sectionItems)))
   }
 
   /**
@@ -53,32 +55,29 @@ export default class ScheduleStore {
       .then(items => this._buildSchedule(date, items))
   }
 
-  @autobind
+  @action.bound
   _buildSchedule (date, items) {
-    const timeItems = new Array(48)
-    items && items.forEach(item => (timeItems[item.schedule_index] = item))
     for (let i = 0; i < 48; i++) {
-      if (!timeItems[i]) {
-        timeItems[i] = {
-          schedule_date: date,
-          schedule_index: i,
-          goal_id: null
-        }
-      }
-      this.scheduleStates.set(
-        timeItems[i].schedule_date + timeItems[i].schedule_index,
-        {
-          isSelected: false
-        }
-      )
+      this.schedules.set(date + i, {
+        schedule_date: date,
+        schedule_index: i,
+        goal_id: null,
+        goal_color: colors.grey,
+        isSelected: false
+      })
     }
+
+    items && items.forEach(item => {
+      item.isSelected = false
+      this.schedules.set(item.schedule_date + item.schedule_index, item)
+    })
 
     // each row has two items
     const timeRows = new Array(24)
     for (let i = 0, j = 0; i < 24; i += 1, j += 2) {
       timeRows[i] = {
-        key: timeItems[j].schedule_date + timeItems[j].schedule_index,
-        data: [timeItems[j], timeItems[j + 1]]
+        key: date + i,
+        data: [date + j, date + (j + 1)]
       }
     }
 
@@ -90,50 +89,48 @@ export default class ScheduleStore {
   }
 
   @action.bound
-  _addPrevDate (schedule) {
-    this.schedules.push(schedule)
+  _addPrevDate (sectionItem) {
+    this.sections.push(sectionItem)
   }
 
   @autobind
   addPrevDate () {
     if (this._isFetching) { return }
     this._isFetching = true
-    const prevDate = getPrevDate(this.schedules[this.schedules.length - 1].key)
+    const prevDate = getPrevDate(this.sections[this.sections.length - 1].key)
     return this._getItemsByDate(prevDate)
-      .then(schedule => {
-        this._addPrevDate(schedule)
+      .then(sectionItem => {
+        this._addPrevDate(sectionItem)
         this._isFetching = false
-        return this.schedules[this.schedules.length - 1]
       })
   }
 
   @action.bound
-  _addNextDate (schedule) {
-    this.schedules.unshift(schedule)
+  _addNextDate (sectionItem) {
+    this.sections.unshift(sectionItem)
   }
 
   @autobind
   addNextDate () {
     if (this._isFetching) { return }
-    const nextDate = getNextDate(this.schedules[0].key)
+    const nextDate = getNextDate(this.sections[0].key)
     return this._getItemsByDate(nextDate)
-      .then(schedule => {
-        this._addNextDate(schedule)
+      .then(sectionItem => {
+        this._addNextDate(sectionItem)
         this._isFetching = false
-        return this.schedules[0]
       })
   }
 
   @action.bound
   toggleItemSelection (id) {
-    const state = this.scheduleStates.get(id)
-    if (state.isSelected) {
-      state.isSelected = false
+    const schedule = this.schedules.get(id)
+    if (schedule.isSelected) {
+      schedule.isSelected = false
       this.selectedSchedules.delete(id)
     } else {
-      state.isSelected = true
+      schedule.isSelected = true
       this.selectedSchedules.add(id)
     }
-    this.scheduleStates.set(id, state)
+    this.schedules.set(id, schedule)
   }
 }

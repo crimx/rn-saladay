@@ -16,7 +16,7 @@
  */
 
 import React, { Component, PureComponent } from 'react'
-import { View, StyleSheet, SectionList, Text, TouchableNativeFeedback, Dimensions } from 'react-native'
+import { View, StyleSheet, SectionList, Text, TouchableWithoutFeedback, Dimensions } from 'react-native'
 import { NavigationActions } from 'react-navigation'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 import Expo from 'expo'
@@ -33,27 +33,20 @@ const sectionItemHeight = 45
 @inject('scheduleStore')
 @observer
 class TimeButton extends Component {
-  id = this.props.item.schedule_date + this.props.item.schedule_index
-
-  @autobind
-  _onPress () {
-    this.props.scheduleStore.toggleItemSelection(this.id)
-  }
+  _onPress = () => this.props.scheduleStore.toggleItemSelection(this.props.item)
 
   render () {
-    const itemState = this.props.scheduleStore.scheduleStates.get(this.id)
+    console.log(this.props.item)
+    const schedule = this.props.scheduleStore.schedules.get(this.props.item)
     return (
-      <TouchableNativeFeedback
-        onPress={this._onPress}
-        background={TouchableNativeFeedback.Ripple('#fff')}
-      >
+      <TouchableWithoutFeedback onPress={this._onPress}>
         <View style={styles.listItemWrap}>
-          <View style={[styles.listItem, {backgroundColor: this.props.item.goal_color || colors.grey}]}>
-            <Text style={styles.listItemText}>{this.props.item.goal_title}</Text>
+          <View style={[styles.listItem, {backgroundColor: schedule.goal_color}]}>
+            <Text style={styles.listItemText}>{schedule.goal_title}</Text>
           </View>
-          {itemState.isSelected && <View style={styles.listItemMask} />}
+          {schedule.isSelected && <View style={styles.listItemMask} />}
         </View>
-      </TouchableNativeFeedback>
+      </TouchableWithoutFeedback>
     )
   }
 }
@@ -96,13 +89,13 @@ export default class Schedule extends Component {
 
   _renderItem = ({item}) => <SectionRow row={item.data} />
 
-  @observable refreshing = false
+  @observable _refreshing = false
 
   @action.bound
   _onRefresh () {
-    this.refreshing = true
+    this._refreshing = true
     this.props.scheduleStore.addNextDate()
-      .then(action(() => (this.refreshing = false)))
+      .then(action(() => (this._refreshing = false)))
   }
 
   @autobind
@@ -118,12 +111,12 @@ export default class Schedule extends Component {
         initialScrollIndex={25}
         initialNumToRender={15}
         getItemLayout={this._getItemLayout}
-        sections={this.props.scheduleStore.schedules.peek()}
+        sections={this.props.scheduleStore.sections.slice()}
         renderSectionHeader={this._renderSectionHeader}
         renderItem={this._renderItem}
         removeClippedSubviews
         showsHorizontalScrollIndicator={false}
-        refreshing={this.refreshing}
+        refreshing={this._refreshing}
         onRefresh={this._onRefresh}
         onEndReached={this._onEndReached}
         onEndReachedThreshold={1}
@@ -136,7 +129,7 @@ const styles = StyleSheet.create({
   sectionHeader: {
     overflow: 'hidden',
     width: deviceWidth,
-    height: sectionHeaderHeight - 4,
+    height: sectionHeaderHeight,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
@@ -175,7 +168,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: halfDeviceWidth,
-    height: sectionItemHeight - 1,
+    height: sectionItemHeight,
     borderLeftWidth: 1,
     borderRightWidth: 1,
     borderBottomWidth: 1,
