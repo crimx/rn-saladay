@@ -86,11 +86,12 @@ export default class ScheduleMenu extends Component {
 const styles = StyleSheet.create({
   menuWrap: {
     position: 'absolute',
+    bottom: 0,
     width: '100%',
     flexDirection: 'row',
     paddingHorizontal: 5,
     paddingVertical: 10,
-    backgroundColor: 'rgba(34, 49, 63, 0.6)'
+    backgroundColor: 'rgba(34, 49, 63, 0.7)'
   },
   menuButtonWrap: {
     width: 40,

@@ -58,7 +58,6 @@ class SectionHeader extends Component {
         background={TouchableNativeFeedback.Ripple(colors.primaryLight)}
       >
         <View style={styles.sectionHeader}>
-          <View style={styles.sectionHeaderRadius} />
           <Text style={styles.sectionHeaderText}>{this.props.section.title}</Text>
         </View>
       </TouchableNativeFeedback>
@@ -96,7 +95,6 @@ export default class Schedule extends Component {
     return (
       <View>
         <SectionList
-          inverted
           stickySectionHeadersEnabled
           initialScrollIndex={25}
           initialNumToRender={15}
@@ -119,24 +117,11 @@ export default class Schedule extends Component {
 
 const styles = StyleSheet.create({
   sectionHeader: {
-    overflow: 'hidden',
     width: deviceWidth,
     height: sectionHeaderHeight,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    borderBottomWidth: 4,
-    borderColor: colors.primary
-  },
-  sectionHeaderRadius: {
-    position: 'absolute',
-    bottom: -4,
-    left: -4,
-    width: deviceWidth + 8,
-    height: sectionHeaderHeight + 15,
-    borderWidth: 4,
-    borderRadius: 12,
-    borderColor: colors.primary
+    backgroundColor: 'rgba(255, 255, 255, 0.7)'
   },
   sectionHeaderText: {
     fontSize: 16,
