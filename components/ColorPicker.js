@@ -16,7 +16,7 @@
  */
 
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions } from 'react-native'
+import { View, StyleSheet, Dimensions, TouchableNativeFeedback } from 'react-native'
 import { NavigationActions } from 'react-navigation'
 import Expo from 'expo'
 import { action, computed, observable } from 'mobx'
@@ -26,7 +26,7 @@ import autobind from 'autobind-decorator'
 import {ColorPicker as Picker} from 'react-native-color-picker'
 import {
   Body, Button, Container, Content,
-  Header, Icon, Left, Right, Text, Title
+  Header, Icon, Left, Right, Title
 } from 'native-base'
 
 const device = Dimensions.get('window')
@@ -35,12 +35,12 @@ const device = Dimensions.get('window')
 @observer
 class ColorButton extends Component {
   @autobind
-  onColorChange () {
-    this.props.onColorChange && this.props.onColorChange(this.props.color)
+  _onColorChange () {
+    this.props.onColorChange(this.props.color)
   }
 
   @autobind
-  changeButtonColor () {
+  _changeButtonColor () {
     this.props.navigationStore.dispatchNavigation(
       NavigationActions.navigate({
         routeName: 'ColorPicker',
@@ -56,11 +56,33 @@ class ColorButton extends Component {
   render () {
     const {color} = this.props
     return (
-      <Button
-        style={[styles.colorButton, {backgroundColor: color}]}
-        onPress={this.onColorChange}
-        onLongPress={this.changeButtonColor}
-      />
+      <TouchableNativeFeedback
+        background={TouchableNativeFeedback.Ripple('#fff')}
+        onPress={this._onColorChange}
+        onLongPress={this._changeButtonColor}
+      >
+        <View style={[styles.colorButton, {backgroundColor: color}]} />
+      </TouchableNativeFeedback>
+    )
+  }
+}
+
+@observer
+class ColorButtonList extends Component {
+  render () {
+    return (
+      <View style={{marginTop: 10, flexDirection: 'row', flexWrap: 'wrap'}}>
+        {
+          this.props.colors.map((color, i) => (
+            <ColorButton
+              key={i}
+              index={i}
+              color={color}
+              onColorChange={this.props.onColorChange}
+            />
+          ))
+        }
+      </View>
     )
   }
 }
@@ -68,30 +90,14 @@ class ColorButton extends Component {
 @inject('appConfigs')
 @observer
 export default class ColorPicker extends Component {
-  @observable colors = this.props.appConfigs.config.colors.slice(0, 16)
-  @computed get $colorButtons () {
-    return this.colors.map((color, i) => (
-      <ColorButton
-        key={i}
-        index={i}
-        color={color}
-        onColorChange={this.applyColor}
-      />
-    ))
-  }
-
-  componentDidMount () {
-    setTimeout(action(() => (this.colors = this.props.appConfigs.config.colors)), 0)
-  }
-
   @action.bound
-  applyColor (color) {
+  _applyColor (color) {
     const {meta, key} = this.props.navigation.state.params
     meta[key] = color
   }
 
   @autobind
-  goBack () {
+  _goBack () {
     this.props.navigation.dispatch(NavigationActions.back())
   }
 
@@ -102,7 +108,7 @@ export default class ColorPicker extends Component {
         <Container style={styles.container}>
           <Header style={{backgroundColor: meta[key]}}>
             <Left>
-              <Button transparent onPress={this.goBack}>
+              <Button transparent onPress={this._goBack}>
                 <Icon name='md-arrow-back' />
               </Button>
             </Left>
@@ -114,12 +120,13 @@ export default class ColorPicker extends Component {
           <Content>
             <Picker
               oldColor={meta[key]}
-              onColorSelected={this.applyColor}
+              onColorSelected={this._applyColor}
               style={{height: 300}}
             />
-            <View style={{marginTop: 10, flexDirection: 'row', flexWrap: 'wrap'}}>
-              {this.$colorButtons}
-            </View>
+            <ColorButtonList
+              colors={this.props.appConfigs.config.colors}
+              onColorChange={this._applyColor}
+            />
           </Content>
         </Container>
       </View>
