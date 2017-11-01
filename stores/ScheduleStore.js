@@ -58,7 +58,7 @@ export default class ScheduleStore {
   @action.bound
   _buildSchedule (date, items) {
     for (let i = 0; i < 48; i++) {
-      this.schedules.set(date + i, {
+      this.schedules.set(genScheduleId(date, i), {
         schedule_date: date,
         schedule_index: i,
         goal_id: null,
@@ -69,7 +69,7 @@ export default class ScheduleStore {
 
     items && items.forEach(item => {
       item.isSelected = false
-      this.schedules.set(item.schedule_date + item.schedule_index, item)
+      this.schedules.set(genScheduleId(date, item.schedule_index), item)
     })
 
     // each row has two items
@@ -77,7 +77,7 @@ export default class ScheduleStore {
     for (let i = 0, j = 0; i < 24; i += 1, j += 2) {
       timeRows[i] = {
         key: date + i,
-        data: [date + j, date + (j + 1)]
+        data: [genScheduleId(date, j), genScheduleId(date, j + 1)]
       }
     }
 
@@ -131,6 +131,17 @@ export default class ScheduleStore {
       schedule.isSelected = true
       this.selectedSchedules.add(id)
     }
-    this.schedules.set(id, schedule)
   }
+
+  @action.bound
+  clearSelection () {
+    this.selectedSchedules.forEach(id => {
+      this.schedules.get(id).isSelected = false
+    })
+    this.selectedSchedules.clear()
+  }
+}
+
+function genScheduleId (date, index) {
+  return date + '-' + index
 }

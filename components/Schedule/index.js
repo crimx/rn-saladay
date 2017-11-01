@@ -15,64 +15,52 @@
  * along with Saladay.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Component, PureComponent } from 'react'
-import { View, StyleSheet, SectionList, Text, TouchableWithoutFeedback, Dimensions } from 'react-native'
-import { NavigationActions } from 'react-navigation'
+import React, { Component } from 'react'
+import { View, StyleSheet, SectionList, Text, TouchableNativeFeedback, Dimensions } from 'react-native'
+import ScheduleItem from './ScheduleItem'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
-import Expo from 'expo'
-import { computed, observable, action } from 'mobx'
+import { observable, action } from 'mobx'
 import { inject, observer } from 'mobx-react'
 import autobind from 'autobind-decorator'
-import colors from '../style/colors'
+import colors from '../../style/colors'
 
-const {width: deviceWidth, height: deviceHeight} = Dimensions.get('window')
-const halfDeviceWidth = deviceWidth / 2
+const { width: deviceWidth } = Dimensions.get('window')
 const sectionHeaderHeight = 40
 const sectionItemHeight = 45
 
-@inject('scheduleStore')
-@observer
-class TimeButton extends Component {
-  _onPress = () => this.props.scheduleStore.toggleItemSelection(this.props.item)
-
-  render () {
-    console.log(this.props.item)
-    const schedule = this.props.scheduleStore.schedules.get(this.props.item)
-    return (
-      <TouchableWithoutFeedback onPress={this._onPress}>
-        <View style={styles.listItemWrap}>
-          <View style={[styles.listItem, {backgroundColor: schedule.goal_color}]}>
-            <Text style={styles.listItemText}>{schedule.goal_title}</Text>
-          </View>
-          {schedule.isSelected && <View style={styles.listItemMask} />}
-        </View>
-      </TouchableWithoutFeedback>
-    )
-  }
-}
-
-@observer
 class SectionRow extends Component {
+  shouldComponentUpdate (nextProps) {
+    const [left, right] = this.props.row
+    const [nextLeft, nextRight] = nextProps.row
+    return left !== nextLeft || right !== nextRight
+  }
   render () {
     return (
       <View style={styles.listRow}>
-        <TimeButton item={this.props.row[0]} />
-        <TimeButton item={this.props.row[1]} />
+        <ScheduleItem item={this.props.row[0]} />
+        <ScheduleItem item={this.props.row[1]} />
       </View>
     )
   }
 }
 
+@inject('scheduleStore')
 class SectionHeader extends Component {
   shouldComponentUpdate (nextProps) {
     return this.props.section.title !== nextProps.section.title
   }
+
   render () {
     return (
-      <View style={styles.sectionHeader}>
-        <View style={styles.sectionHeaderRadius} />
-        <Text style={styles.sectionHeaderText}>{this.props.section.title}</Text>
-      </View>
+      <TouchableNativeFeedback
+        onPress={this.props.scheduleStore.clearSelection}
+        background={TouchableNativeFeedback.Ripple(colors.primaryLight)}
+      >
+        <View style={styles.sectionHeader}>
+          <View style={styles.sectionHeaderRadius} />
+          <Text style={styles.sectionHeaderText}>{this.props.section.title}</Text>
+        </View>
+      </TouchableNativeFeedback>
     )
   }
 }
@@ -85,9 +73,9 @@ export default class Schedule extends Component {
     getSectionHeaderHeight: () => sectionHeaderHeight
   })
 
-  _renderSectionHeader = ({section}) => <SectionHeader section={section} />
+  _renderSectionHeader = ({ section }) => <SectionHeader section={section} />
 
-  _renderItem = ({item}) => <SectionRow row={item.data} />
+  _renderItem = ({ item }) => <SectionRow row={item.data} />
 
   @observable _refreshing = false
 
@@ -152,29 +140,7 @@ const styles = StyleSheet.create({
   },
   listRow: {
     flexDirection: 'row',
-  },
-  listItemWrap: {
-    width: halfDeviceWidth,
-    height: sectionItemHeight,
-  },
-  listItemMask: {
-    position: 'absolute',
-    width: halfDeviceWidth,
-    height: sectionItemHeight,
-    backgroundColor: 'rgba(54, 215, 183, 0.5)'
-  },
-  listItem: {
-    // flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: halfDeviceWidth,
-    height: sectionItemHeight,
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#fff'
-  },
-  listItemText: {
-    color: '#fff',
+    width: deviceWidth,
+    height: sectionItemHeight
   }
 })
