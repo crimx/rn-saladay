@@ -18,6 +18,7 @@
 import React, { Component } from 'react'
 import { View, StyleSheet, SectionList, Text, TouchableNativeFeedback, Dimensions } from 'react-native'
 import ScheduleItem from './ScheduleItem'
+import ScheduleMenu from './ScheduleMenu'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 import { observable, action } from 'mobx'
 import { inject, observer } from 'mobx-react'
@@ -93,22 +94,25 @@ export default class Schedule extends Component {
 
   render () {
     return (
-      <SectionList
-        inverted
-        stickySectionHeadersEnabled
-        initialScrollIndex={25}
-        initialNumToRender={15}
-        getItemLayout={this._getItemLayout}
-        sections={this.props.scheduleStore.sections.slice()}
-        renderSectionHeader={this._renderSectionHeader}
-        renderItem={this._renderItem}
-        removeClippedSubviews
-        showsHorizontalScrollIndicator={false}
-        refreshing={this._refreshing}
-        onRefresh={this._onRefresh}
-        onEndReached={this._onEndReached}
-        onEndReachedThreshold={1}
-      />
+      <View>
+        <SectionList
+          inverted
+          stickySectionHeadersEnabled
+          initialScrollIndex={25}
+          initialNumToRender={15}
+          getItemLayout={this._getItemLayout}
+          sections={this.props.scheduleStore.sections.slice()}
+          renderSectionHeader={this._renderSectionHeader}
+          renderItem={this._renderItem}
+          removeClippedSubviews
+          showsHorizontalScrollIndicator={false}
+          refreshing={this._refreshing}
+          onRefresh={this._onRefresh}
+          onEndReached={this._onEndReached}
+          onEndReachedThreshold={1}
+        />
+        <ScheduleMenu />
+      </View>
     )
   }
 }

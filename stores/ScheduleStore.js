@@ -28,7 +28,11 @@ export default class ScheduleStore {
   // plain objects for section list
   @observable sections = observable.shallowArray()
 
-  @observable selectedSchedules = new Set()
+  @observable selectedSchedules = observable.shallowMap()
+  // reduce rerender
+  @computed get isSelectedSchedulesEmpty () {
+    return this.selectedSchedules.size <= 0
+  }
 
   _isFetching = false
 
@@ -129,7 +133,7 @@ export default class ScheduleStore {
       this.selectedSchedules.delete(id)
     } else {
       schedule.isSelected = true
-      this.selectedSchedules.add(id)
+      this.selectedSchedules.set(id, id)
     }
   }
 
@@ -140,8 +144,50 @@ export default class ScheduleStore {
     })
     this.selectedSchedules.clear()
   }
+
+  /**
+   * Move the whole selection upwards
+   */
+  @autobind
+  moveSelectionUpwards () {
+    const ids = Array.from(this.selectedSchedules.keys())
+    this.clearSelection()
+    ids.forEach(id => {
+      let [date, index] = devideScheduleId(id)
+      if (index >= 46) {
+        // 46 & 47 are in the first row
+        this.toggleItemSelection(genScheduleId(getPrevDate(date), index - 46))
+      } else {
+        this.toggleItemSelection(genScheduleId(date, index + 2))
+      }
+    })
+  }
+
+  /**
+   * Move the whole selection downwards
+   */
+  @autobind
+  moveSelectionDownwards () {
+    const ids = Array.from(this.selectedSchedules.keys())
+    this.clearSelection()
+    ids.forEach(id => {
+      let [date, index] = devideScheduleId(id)
+      if (index <= 1) {
+        // 0 & 1 are in the last row
+        this.toggleItemSelection(genScheduleId(getNextDate(date), 46 + index))
+      } else {
+        this.toggleItemSelection(genScheduleId(date, index - 2))
+      }
+    })
+  }
 }
 
 function genScheduleId (date, index) {
   return date + '-' + index
+}
+
+function devideScheduleId (id) {
+  const result = id.split('-')
+  result[1] = Number(result[1])
+  return result
 }
