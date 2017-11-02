@@ -17,10 +17,7 @@
 
 import React, { Component } from 'react'
 import { View, StyleSheet, Text, TouchableWithoutFeedback } from 'react-native'
-import { computed, observable, action } from 'mobx'
 import { inject, observer } from 'mobx-react'
-import autobind from 'autobind-decorator'
-import colors from '../../style/colors'
 
 @inject('scheduleStore')
 @observer
