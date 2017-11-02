@@ -47,19 +47,30 @@ export default class ScheduleMenu extends Component {
     super(...args)
 
     const {
+      setSelectionSchedule,
+      removeSelectionSchedule,
       moveSelectionUpwards,
-      moveSelectionDownwards
+      moveSelectionDownwards,
+      clearSelection
     } = this.props.scheduleStore
 
-    this.listData = [(
+    this.listData = [
+      <MenuButton onPress={setSelectionSchedule}>
+        <MaterialCommunityIcons name='plus' color='#fff' size={20} />
+      </MenuButton>,
+      <MenuButton onPress={removeSelectionSchedule}>
+        <MaterialCommunityIcons name='minus' color='#fff' size={20} />
+      </MenuButton>,
       <MenuButton onPress={moveSelectionUpwards}>
-        <MaterialCommunityIcons name="menu-up" color="#fff" size={35} style={{paddingBottom: 2}}/>
-      </MenuButton>
-    ), (
+        <MaterialCommunityIcons name='menu-up' color='#fff' size={35} style={{paddingBottom: 2}} />
+      </MenuButton>,
       <MenuButton onPress={moveSelectionDownwards}>
-        <MaterialCommunityIcons name="menu-down" color="#fff" size={35} />
+        <MaterialCommunityIcons name='menu-down' color='#fff' size={35} />
+      </MenuButton>,
+      <MenuButton onPress={clearSelection}>
+        <MaterialCommunityIcons name='close' color='#fff' size={20} />
       </MenuButton>
-    )]
+    ]
   }
 
   _keyExtractor = (item, index) => index
@@ -74,6 +85,7 @@ export default class ScheduleMenu extends Component {
       <View style={styles.menuWrap}>
         <FlatList
           horizontal
+          showsHorizontalScrollIndicator={false}
           data={this.listData}
           renderItem={this._renderItem}
           keyExtractor={this._keyExtractor}

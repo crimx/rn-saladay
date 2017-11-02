@@ -32,9 +32,9 @@ export default class Dao {
 
   init () {
     let tables = new Tables(this.db)
-    return tables.drop()
-      .then(() => tables.list())
-    // return tables.list()
+    // return tables.drop()
+    //   .then(() => tables.list())
+    return tables.list()
       .then(tbs => {
         if (tbs.indexOf('configs') === -1) {
           this.isFresh = true
@@ -133,7 +133,7 @@ export default class Dao {
     return Promise.all([
       new GoalLists(this.db).insert(goalListsData),
       new GoalItems(this.db).insert(goalItemsData),
-      new ScheduleItems(this.db).insert(scheduleItemsData)
+      new ScheduleItems(this.db).replace(scheduleItemsData)
     ])
   }
 }

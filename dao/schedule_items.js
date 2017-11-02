@@ -27,7 +27,7 @@ export default class ScheduleItems {
   * @param {object|object[]} data
   * @return Promse
   */
-  insert (data) {
+  replace (data) {
     let arr = Array.isArray(data) ? data : [data]
 
     const keys = [
@@ -37,7 +37,7 @@ export default class ScheduleItems {
     ]
 
     const sql = (
-      `INSERT INTO schedule_items
+      `REPLACE INTO schedule_items
         (${keys.join(',')})
       VALUES
         (${Array(keys.length).fill('?').join(',')});`
@@ -49,6 +49,30 @@ export default class ScheduleItems {
           tx.executeSql(
             sql,
             keys.map(k => d[k])
+          )
+        })
+      }, reject, resolve)
+    })
+  }
+
+  /**
+  * @param {object|object[]} data
+  * @return Promse
+  */
+  remove (data) {
+    let arr = Array.isArray(data) ? data : [data]
+
+    const sql = (
+      `DELETE FROM schedule_items
+      WHERE schedule_date = ? AND schedule_index = ?;`
+    )
+
+    return new Promise((resolve, reject) => {
+      this.db.transaction(tx => {
+        arr.forEach(d => {
+          tx.executeSql(
+            sql,
+            [d.schedule_date, d.schedule_index]
           )
         })
       }, reject, resolve)

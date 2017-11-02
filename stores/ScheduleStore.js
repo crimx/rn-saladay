@@ -182,6 +182,39 @@ export default class ScheduleStore {
       }
     })
   }
+
+  /**
+   * open a new page to choose goal
+   */
+  @autobind
+  setSelectionSchedule () {
+
+  }
+
+  /**
+   * clear the selected schedules
+   */
+  @action.bound
+  removeSelectionSchedule () {
+    var sqlData = []
+    this.selectedSchedules.forEach(id => {
+      const [date, index] = devideScheduleId(id)
+      this.schedules.set(id, {
+        schedule_date: date,
+        schedule_index: index,
+        goal_id: null,
+        goal_color: colors.grey,
+        isSelected: false
+      })
+      sqlData.push({
+        schedule_date: date,
+        schedule_index: index
+      })
+    })
+    daoScheduleItems.remove(sqlData)
+      .catch(err => console.error(err))
+    this.selectedSchedules.clear()
+  }
 }
 
 function genScheduleId (date, index) {
