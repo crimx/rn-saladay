@@ -51,7 +51,7 @@ export default class AppContainer extends Component {
               </Body>
               <Right />
             </Header>
-            <Tabs initialPage={0} tabBarUnderlineStyle={{height: 2}}>
+            <Tabs locked initialPage={0} tabBarUnderlineStyle={{height: 2}}>
               <Tab heading='Goals'>
                 <GoalLists />
               </Tab>
