@@ -23,6 +23,7 @@ import AppContainer from './AppContainer'
 import GoalItems from './GoalItems'
 import GoalDetail from './GoalDetail'
 import ListDetail from './ListDetail'
+import ChooseGoalForSchedule from './ChooseGoalForSchedule'
 import ColorPicker from './ColorPicker'
 
 const AppNavigator = StackNavigator({
@@ -30,6 +31,7 @@ const AppNavigator = StackNavigator({
   GoalItems: { screen: GoalItems },
   GoalDetail: { screen: GoalDetail },
   ListDetail: { screen: ListDetail },
+  ChooseGoalForSchedule: { screen: ChooseGoalForSchedule },
   ColorPicker: { screen: ColorPicker }
 }, {
   initialRouteName: 'App',

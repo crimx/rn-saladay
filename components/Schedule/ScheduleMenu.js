@@ -16,12 +16,10 @@
  */
 
 import React, { Component } from 'react'
-import { View, StyleSheet, Text, TouchableNativeFeedback, FlatList } from 'react-native'
+import { View, StyleSheet, TouchableNativeFeedback, FlatList } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { computed, observable, action } from 'mobx'
+import { NavigationActions } from 'react-navigation'
 import { inject, observer } from 'mobx-react'
-import autobind from 'autobind-decorator'
-import colors from '../../style/colors'
 
 class MenuButton extends Component {
   render () {
@@ -40,14 +38,13 @@ class MenuButton extends Component {
   }
 }
 
-@inject('scheduleStore')
+@inject('scheduleStore', 'navigationStore')
 @observer
 export default class ScheduleMenu extends Component {
   constructor (...args) {
     super(...args)
 
     const {
-      setSelectionSchedule,
       removeSelectionSchedule,
       moveSelectionUpwards,
       moveSelectionDownwards,
@@ -55,7 +52,7 @@ export default class ScheduleMenu extends Component {
     } = this.props.scheduleStore
 
     this.listData = [
-      <MenuButton onPress={setSelectionSchedule}>
+      <MenuButton onPress={this._chooseGoal}>
         <MaterialCommunityIcons name='plus' color='#fff' size={20} />
       </MenuButton>,
       <MenuButton onPress={removeSelectionSchedule}>
@@ -68,9 +65,17 @@ export default class ScheduleMenu extends Component {
         <MaterialCommunityIcons name='menu-down' color='#fff' size={35} />
       </MenuButton>,
       <MenuButton onPress={clearSelection}>
-        <MaterialCommunityIcons name='close' color='#fff' size={20} />
+        <MaterialCommunityIcons name='chevron-down' color='#fff' size={20} />
       </MenuButton>
     ]
+  }
+
+  _chooseGoal = () => {
+    this.props.navigationStore.dispatchNavigation(
+      NavigationActions.navigate({
+        routeName: 'ChooseGoalForSchedule'
+      })
+    )
   }
 
   _keyExtractor = (item, index) => index

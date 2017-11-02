@@ -184,11 +184,28 @@ export default class ScheduleStore {
   }
 
   /**
-   * open a new page to choose goal
+   * set schedules by goal id
+   * @param {object} goalItem
    */
-  @autobind
-  setSelectionSchedule () {
-
+  @action.bound
+  setSelectionSchedule ({goal_date: goal_id, goal_color, goal_title}) {
+    const sqlData = []
+    this.selectedSchedules.forEach(id => {
+      const [date, index] = devideScheduleId(id)
+      const schedule = {
+        schedule_date: date,
+        schedule_index: index,
+        goal_id,
+        goal_color,
+        goal_title,
+        isSelected: false
+      }
+      this.schedules.set(id, schedule)
+      sqlData.push(schedule)
+    })
+    daoScheduleItems.replace(sqlData)
+      .catch(err => console.error(err))
+    this.selectedSchedules.clear()
   }
 
   /**
@@ -196,20 +213,18 @@ export default class ScheduleStore {
    */
   @action.bound
   removeSelectionSchedule () {
-    var sqlData = []
+    const sqlData = []
     this.selectedSchedules.forEach(id => {
       const [date, index] = devideScheduleId(id)
-      this.schedules.set(id, {
+      const schedule = {
         schedule_date: date,
         schedule_index: index,
         goal_id: null,
         goal_color: colors.grey,
         isSelected: false
-      })
-      sqlData.push({
-        schedule_date: date,
-        schedule_index: index
-      })
+      }
+      this.schedules.set(id, schedule)
+      sqlData.push(schedule)
     })
     daoScheduleItems.remove(sqlData)
       .catch(err => console.error(err))
