@@ -81,6 +81,7 @@ export default class ScheduleStore {
     for (let i = 0, j = 0; i < 24; i += 1, j += 2) {
       timeRows[i] = {
         key: date + i,
+        index: i,
         data: [genScheduleId(date, j), genScheduleId(date, j + 1)]
       }
     }

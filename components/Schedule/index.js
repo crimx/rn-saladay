@@ -36,10 +36,12 @@ class SectionRow extends Component {
     return left !== nextLeft || right !== nextRight
   }
   render () {
+    const {row, index} = this.props
     return (
       <View style={styles.listRow}>
-        <ScheduleItem item={this.props.row[0]} />
-        <ScheduleItem item={this.props.row[1]} />
+        <Text style={styles.listRowTime}>{`${index}:00`}</Text>
+        <ScheduleItem item={row[0]} />
+        <ScheduleItem item={row[1]} />
       </View>
     )
   }
@@ -75,7 +77,7 @@ export default class Schedule extends Component {
 
   _renderSectionHeader = ({ section }) => <SectionHeader section={section} />
 
-  _renderItem = ({ item }) => <SectionRow row={item.data} />
+  _renderItem = ({ item }) => <SectionRow row={item.data} index={item.index} />
 
   @observable _refreshing = false
 
@@ -119,17 +121,26 @@ const styles = StyleSheet.create({
   sectionHeader: {
     width: deviceWidth,
     height: sectionHeaderHeight,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingLeft: 45,
     backgroundColor: 'rgba(255, 255, 255, 0.7)'
   },
   sectionHeaderText: {
+    height: sectionHeaderHeight,
     fontSize: 16,
+    textAlign: 'center',
+    textAlignVertical: 'center',
     color: colors.greyDark,
   },
   listRow: {
     flexDirection: 'row',
     width: deviceWidth,
     height: sectionItemHeight
+  },
+  listRowTime: {
+    width: 45,
+    height: sectionItemHeight,
+    paddingRight: 5,
+    textAlign: 'right',
+    color: colors.greyDark
   }
 })
