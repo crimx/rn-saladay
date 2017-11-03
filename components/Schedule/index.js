@@ -17,10 +17,11 @@
 
 import React, { Component } from 'react'
 import { View, StyleSheet, SectionList, Text, TouchableNativeFeedback, Dimensions } from 'react-native'
+import { Fab, Icon } from 'native-base'
 import ScheduleItem from './ScheduleItem'
 import ScheduleMenu from './ScheduleMenu'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
-import { observable, action } from 'mobx'
+import { observable, action, computed } from 'mobx'
 import { inject, observer } from 'mobx-react'
 import autobind from 'autobind-decorator'
 import colors from '../../style/colors'
@@ -28,6 +29,7 @@ import colors from '../../style/colors'
 const { width: deviceWidth } = Dimensions.get('window')
 const sectionHeaderHeight = 40
 const sectionItemHeight = 45
+const sectionHeight = sectionHeaderHeight + sectionItemHeight * 24
 
 class SectionRow extends Component {
   shouldComponentUpdate (nextProps) {
@@ -67,6 +69,24 @@ class SectionHeader extends Component {
   }
 }
 
+@observer
+class BackToToday extends Component {
+  render () {
+    const {direction, onPress} = this.props
+    if (!direction) { return null }
+
+    return (
+      <Fab active
+        style={styles.fab}
+        position='bottomRight'
+        onPress={onPress}
+      >
+        <Icon name={`ios-arrow-${direction}`} />
+      </Fab>
+    )
+  }
+}
+
 @inject('scheduleStore')
 @observer
 export default class Schedule extends Component {
@@ -80,6 +100,12 @@ export default class Schedule extends Component {
   _renderItem = ({ item }) => <SectionRow row={item.data} index={item.index} />
 
   @observable _refreshing = false
+  @observable _todayOutOfSightDirection = false
+
+  // coordinate of today section
+  @computed get _todayY () {
+    return this.props.scheduleStore.todaySectionIndex * sectionHeight
+  }
 
   @action.bound
   _onRefresh () {
@@ -93,10 +119,43 @@ export default class Schedule extends Component {
     this.props.scheduleStore.addPrevDate()
   }
 
+  @autobind
+  _backToToday () {
+    this.refs.listRef.scrollToLocation({
+      sectionIndex: this.props.scheduleStore.todaySectionIndex,
+      itemIndex: 0,
+      viewOffset: sectionHeaderHeight
+    })
+  }
+
+  _scrollTimeout = null
+
+  @autobind
+  _onScroll ({nativeEvent}) {
+    clearTimeout(this._scrollTimeout)
+    this._scrollTimeout = setTimeout(() => {
+      this._setTodayOutOfSightDirection(nativeEvent.contentOffset.y)
+    }, 15)
+  }
+
+  @action.bound
+  _setTodayOutOfSightDirection (y) {
+    console.log('yeye')
+    const offset = this._todayY - y
+    if (offset > sectionHeight) {
+      this._todayOutOfSightDirection = 'down'
+    } else if (offset < -sectionHeight) {
+      this._todayOutOfSightDirection = 'up'
+    } else {
+      this._todayOutOfSightDirection = false
+    }
+  }
+
   render () {
     return (
       <View>
         <SectionList
+          ref='listRef'
           stickySectionHeadersEnabled
           initialScrollIndex={25}
           initialNumToRender={15}
@@ -105,13 +164,18 @@ export default class Schedule extends Component {
           renderSectionHeader={this._renderSectionHeader}
           renderItem={this._renderItem}
           removeClippedSubviews
+          showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
           refreshing={this._refreshing}
           onRefresh={this._onRefresh}
           onEndReached={this._onEndReached}
           onEndReachedThreshold={1}
+          onScroll={this._onScroll}
         />
         <ScheduleMenu />
+        <BackToToday
+          direction={this.props.scheduleStore.isSelectedSchedulesEmpty && this._todayOutOfSightDirection}
+          onPress={this._backToToday} />
       </View>
     )
   }
@@ -142,5 +206,8 @@ const styles = StyleSheet.create({
     paddingRight: 5,
     textAlign: 'right',
     color: colors.greyDark
+  },
+  fab: {
+    backgroundColor: colors.primary
   }
 })

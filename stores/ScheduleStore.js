@@ -34,6 +34,11 @@ export default class ScheduleStore {
     return this.selectedSchedules.size <= 0
   }
 
+  @computed get todaySectionIndex () {
+    const today = getDate(Date.now())
+    return this.sections.findIndex(({key}) => key === today)
+  }
+
   _isFetching = false
 
   constructor () {
