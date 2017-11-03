@@ -42,7 +42,6 @@ export default class ScheduleStore {
   _isFetching = false
 
   constructor () {
-    // reverse list for inverted SectionList
     Promise.all(
       [
         getDate(Date.now() + 24 * 3600 * 1000), // tomorrow
@@ -235,6 +234,22 @@ export default class ScheduleStore {
     daoScheduleItems.remove(sqlData)
       .catch(err => console.error(err))
     this.selectedSchedules.clear()
+  }
+
+  /**
+   * @return {Promise}
+   */
+  @autobind
+  deleteSchedulesByGoalId (goalId) {
+    return daoScheduleItems.removeByGoalId(goalId)
+      .then(() => {
+        Promise.all(
+          this.sections.map(({key}) => this._getItemsByDate(key))
+        ).then(action(sectionItems => {
+          this.sections = observable.shallowArray(sectionItems)
+          this.selectedSchedules.clear()
+        }))
+      })
   }
 }
 

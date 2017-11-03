@@ -140,7 +140,6 @@ export default class Schedule extends Component {
 
   @action.bound
   _setTodayOutOfSightDirection (y) {
-    console.log('yeye')
     const offset = this._todayY - y
     if (offset > sectionHeight) {
       this._todayOutOfSightDirection = 'down'

@@ -80,6 +80,21 @@ export default class ScheduleItems {
   }
 
   /**
+  * @param {string} goalId
+  * @return Promse
+  */
+  removeByGoalId (goalId) {
+    return new Promise((resolve, reject) => {
+      this.db.transaction(tx => {
+        tx.executeSql(
+          `DELETE FROM schedule_items WHERE goal_id = ?;`,
+          [goalId]
+        )
+      }, reject, resolve)
+    })
+  }
+
+  /**
   * @param {Date|string|number} time - Date instance or string in "YYYYDDMM" format or
   * string/number representing milliseconds elapsed since the UNIX epoch
   * @return Promse with an array of items

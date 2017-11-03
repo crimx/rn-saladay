@@ -30,7 +30,7 @@ import {
   Header, Icon, Left, Right, Text, Title, Toast
 } from 'native-base'
 
-@inject('goalStore')
+@inject('goalStore', 'scheduleStore')
 @observer
 export default class GoalDetail extends Component {
   // Must needed. To make these two observable
@@ -84,12 +84,15 @@ export default class GoalDetail extends Component {
   _deleteItem () {
     Alert.alert(
       'Warning',
-      `Delete Goal "${this.goalMeta.goal_title}"?`,
+      `Delete Goal "${this.goalMeta.goal_title}"?\n` +
+      'Items in schedule will also be deleted.\n' +
+      '(You can check the item instead.)',
       [
         {text: 'Cancel', style: 'cancel'},
         {
           text: 'OK',
           onPress: () => this.props.goalStore.deleteItem(this.goalMeta)
+            .then(() => this.props.scheduleStore.deleteSchedulesByGoalId(this.goalMeta.goal_date))
             .then(() => {
               Toast.show({
                 text: `Item deleted`,
