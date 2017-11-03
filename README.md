@@ -32,3 +32,11 @@ Many thanks to these AWESOME open-sourced resources.
 - [Optimizing rendering React components](https://mobx.js.org/best/react-performance.html)
 - [React is Slow, React is Fast: Optimizing React Apps in Practice](https://marmelab.com/blog/2017/02/06/react-is-slow-react-is-fast.html)
 - [BackHandler](https://facebook.github.io/react-native/docs/backhandler.html)
+- [React Native’s SectionList and getItemLayout](https://medium.com/@jsoendermann/sectionlist-and-getitemlayout-2293b0b916fb)
+- [React Native 的 ListView 性能问题已解决](https://segmentfault.com/a/1190000008589705)
+- [React native: get current scroll position of scrollview](https://stackoverflow.com/questions/29503252/react-native-get-current-scroll-position-of-scrollview/32070911)
+
+## Videos
+
+- [Infinite Scroll with React Native FlatList](https://www.youtube.com/watch?v=rY0braBBlgw)
+- [Getting Started with the React Native SectionList by Nader Dabit](https://www.youtube.com/watch?v=5-j70h4-sOQ)
