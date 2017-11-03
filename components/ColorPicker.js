@@ -19,7 +19,7 @@ import React, { Component } from 'react'
 import { View, StyleSheet, Dimensions, TouchableNativeFeedback } from 'react-native'
 import { NavigationActions } from 'react-navigation'
 import Expo from 'expo'
-import { action, computed, observable } from 'mobx'
+import { action } from 'mobx'
 import { inject, observer } from 'mobx-react'
 import autobind from 'autobind-decorator'
 

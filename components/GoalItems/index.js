@@ -22,101 +22,14 @@ import Expo from 'expo'
 import autobind from 'autobind-decorator'
 
 import { inject, observer } from 'mobx-react'
-import { toJS, action, observable } from 'mobx'
 
-import colors from '../style/colors'
+import GoalItem from './GoalItem'
+import DoneLists from './DoneLists'
 
 import {
-  Body, Button, CheckBox, Container, Content, Fab,
-  Header, Icon, Left, Right, List, ListItem, Spinner, Text, Title
+  Body, Button, Container, Content, Fab,
+  Header, Icon, Left, Right, List, Title
 } from 'native-base'
-
-@inject('goalStore', 'navigationStore')
-@observer
-class GoalItem extends Component {
-  @autobind
-  _toGoalDetail () {
-    this.props.navigationStore.dispatchNavigation(
-      NavigationActions.navigate({
-        routeName: 'GoalDetail',
-        params: { goalMeta: toJS(this.props.item) } // clone
-      })
-    )
-  }
-
-  @action.bound
-  _changeGoalDone () {
-    this.props.item.goal_done = this.props.item.goal_done ? '' : Date.now().toString()
-    this.props.goalStore.changeGoalItemDoneState(toJS(this.props.item))
-  }
-
-  render () {
-    let {item, index, lastIndex} = this.props
-    return (
-      <ListItem button onPress={this._toGoalDetail} first={index === 0} last={index === lastIndex}>
-        <CheckBox checked={!!item.goal_done} color={item.goal_color} style={styles.checkBox} onPress={this._changeGoalDone} />
-        <Body>
-          <Text>{item.goal_title}</Text>
-        </Body>
-        <Right>
-          <Icon name='md-arrow-forward' style={styles.toDetail} />
-        </Right>
-      </ListItem>
-    )
-  }
-}
-
-@inject('goalStore')
-@observer
-class DoneLists extends Component {
-  @observable isShow = false
-
-  @action.bound
-  _clearDoneList () {
-    this.props.goalStore.goalDoneItems.delete(this.props.listMeta.list_id)
-  }
-
-  componentWillMount () {
-    this._clearDoneList()
-  }
-
-  componentWillUnmount () {
-    this._clearDoneList()
-  }
-
-  @action.bound
-  _loadDoneItems () {
-    this.isShow = true
-    this.props.goalStore.selectDoneItemsFromList(this.props.listMeta.list_id)
-  }
-
-  render () {
-    if (this.isShow) {
-      const doneList = this.props.goalStore.goalDoneItems.get(this.props.listMeta.list_id)
-      return (
-        <List>
-          <ListItem itemDivider>
-            <Text>Completed Goals</Text>
-          </ListItem>
-          {
-            doneList
-              ? doneList.map((item, i, arr) =>
-                <GoalItem key={item.goal_date} item={item} index={i} lastIndex={arr.length - 1} />
-              )
-              : <Spinner color={colors.primary} />
-          }
-        </List>
-      )
-    } else {
-      return (
-        <Button
-          block transparent
-          onPress={this._loadDoneItems}
-        ><Text uppercase={false} style={styles.btnShowDoneItems}>View completed goals</Text></Button>
-      )
-    }
-  }
-}
 
 @inject('goalStore')
 @observer
@@ -196,17 +109,5 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
     marginTop: Expo.Constants.statusBarHeight
-  },
-  checkBox: {
-    marginTop: 1
-  },
-  toDetail: {
-    fontSize: 20,
-    color: colors.grey
-  },
-  btnShowDoneItems: {
-    marginTop: 30,
-    fontSize: 14,
-    color: colors.greyDark
   }
 })

@@ -104,7 +104,6 @@ export default class ChooseGoalForSchedule extends Component {
   _renderItem = ({item}) => <SectionItem item={item.data} />
 
   render () {
-    console.log(this._sections)
     return (
       <View style={{flex: 1, backgroundColor: colors.primary}}>
         <Container style={styles.container}>

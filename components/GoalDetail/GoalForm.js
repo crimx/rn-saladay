@@ -16,25 +16,21 @@
  */
 
 import React, { Component } from 'react'
-import { View, StyleSheet, Keyboard, DatePickerAndroid, TimePickerAndroid, Alert } from 'react-native'
+import { StyleSheet, DatePickerAndroid, TimePickerAndroid } from 'react-native'
 import { NavigationActions } from 'react-navigation'
-import Expo from 'expo'
 import autobind from 'autobind-decorator'
 
 import { inject, observer } from 'mobx-react'
-import { observable, action, computed } from 'mobx'
+import { action, computed } from 'mobx'
 
-import colors from '../style/colors'
+import colors from '../../style/colors'
 
-import AutoExpandInput from './lib/AutoExpandInput'
-import {
-  Body, Button, Container, Content, Form,
-  Header, Icon, Input, Item, Label, Left, Right, Text, Title, Toast
-} from 'native-base'
+import AutoExpandInput from '../lib/AutoExpandInput'
+import { Button, Form, Input, Item, Label, Text, Toast } from 'native-base'
 
 @inject('navigationStore')
 @observer
-class GoalForm extends Component {
+export default class GoalForm extends Component {
   @computed get _goalDue () {
     if (this.props.goalMeta.goal_due) {
       return new Date(Number(this.props.goalMeta.goal_due)).toLocaleString()
@@ -155,125 +151,7 @@ class GoalForm extends Component {
   }
 }
 
-@inject('goalStore')
-@observer
-export default class GoalDetail extends Component {
-  // Must needed. To make these two observable
-  @observable goalMeta = this.props.navigation.state.params.goalMeta
-  @observable addMode = this.props.navigation.state.params.addMode
-
-  @autobind
-  _saveItem () {
-    Keyboard.dismiss()
-    if (!this.goalMeta.goal_title) {
-      return Toast.show({
-        text: 'Please enter title',
-        buttonText: 'OK',
-        type: 'warning',
-        duration: 2000
-      })
-    }
-
-    const {goalStore} = this.props
-    const goalMeta = this.goalMeta
-    if (!goalMeta.goal_done && this.props.navigation.state.params.goalMeta.goal_done) {
-      // from done list to undone list
-      goalMeta.goal_order = goalStore.goalUndoneItems.get(goalMeta.list_id).length
-    }
-
-    return (this.addMode ? goalStore.addGoalItem(goalMeta) : goalStore.updateGoalItem(goalMeta))
-      .then(() => {
-        Toast.show({
-          text: `Item ${this.addMode ? 'added' : 'updated'} successfully`,
-          buttonText: 'OK',
-          duration: 2000
-        })
-        this.props.navigation.dispatch(NavigationActions.back())
-      })
-      .catch(err => {
-        Toast.show({
-          text: `Cannot ${this.addMode ? 'add' : 'update'} item`,
-          type: 'danger',
-          duration: 2000
-        })
-        __DEV__ && console.error(err)
-      })
-  }
-
-  @autobind
-  _goBack () {
-    this.props.navigation.dispatch(NavigationActions.back())
-  }
-
-  @action.bound
-  _deleteItem () {
-    Alert.alert(
-      'Warning',
-      `Delete Goal "${this.goalMeta.goal_title}"?`,
-      [
-        {text: 'Cancel', style: 'cancel'},
-        {
-          text: 'OK',
-          onPress: () => this.props.goalStore.deleteItem(this.goalMeta)
-            .then(() => {
-              Toast.show({
-                text: `Item deleted`,
-                buttonText: 'OK',
-                duration: 2000
-              })
-              this.props.navigation.dispatch(NavigationActions.back())
-            })
-            .catch(err => {
-              Toast.show({
-                text: `Cannot delete item`,
-                type: 'danger',
-                duration: 2000
-              })
-              __DEV__ && console.error(err)
-            })
-        }
-      ]
-    )
-  }
-
-  render () {
-    return (
-      <View style={{flex: 1, backgroundColor: this.goalMeta.goal_color}}>
-        <Container style={styles.container}>
-          <Header style={{backgroundColor: this.goalMeta.goal_color}}>
-            <Left>
-              <Button transparent onPress={this._goBack}>
-                <Icon name='md-arrow-back' />
-              </Button>
-            </Left>
-            <Body>
-              <Title>{this.goalMeta.goal_title || (this.addMode ? 'New Goal' : '')}</Title>
-            </Body>
-            <Right>
-              <Button transparent onPress={this._saveItem}>
-                <Text>Save</Text>
-              </Button>
-            </Right>
-          </Header>
-          <Content>
-            <GoalForm goalMeta={this.goalMeta} />
-            {this.addMode || (
-              <Button full danger onPress={this._deleteItem}>
-                <Text uppercase={false}>Delete Item</Text>
-              </Button>
-            )}
-          </Content>
-        </Container>
-      </View>
-    )
-  }
-}
-
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#fff',
-    marginTop: Expo.Constants.statusBarHeight
-  },
   colorButton: {
     marginTop: 15,
     marginBottom: 15,

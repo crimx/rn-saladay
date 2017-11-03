@@ -15,62 +15,22 @@
  * along with Saladay.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import colors from '../style/colors'
+import colors from '../../style/colors'
 import React, { Component } from 'react'
 import { StyleSheet } from 'react-native'
 import { NavigationActions } from 'react-navigation'
 import { inject, observer } from 'mobx-react'
 import { toJS } from 'mobx'
-import { Body, Fab, Icon, Left, List, ListItem, Right, Text, View } from 'native-base'
+import { Fab, Icon, List, View } from 'native-base'
 import autobind from 'autobind-decorator'
-
-@inject('goalStore', 'navigationStore')
-@observer
-class GoalListItem extends Component {
-  @autobind
-  _toGoalItems () {
-    this.props.navigationStore.dispatchNavigation(
-      NavigationActions.navigate({
-        routeName: 'GoalItems',
-        params: { listMeta: this.props.list }
-      })
-    )
-  }
-
-  @autobind
-  _toListDetail () {
-    this.props.navigationStore.dispatchNavigation(
-      NavigationActions.navigate({
-        routeName: 'ListDetail',
-        params: { listMeta: toJS(this.props.list) } // clone
-      })
-    )
-  }
-
-  render () {
-    const {list} = this.props
-    return (
-      <ListItem icon button onPress={this._toGoalItems}>
-        <Left style={styles.listIconWrap}>
-          <Icon name='ios-list' style={{fontSize: 35, color: list.list_color}} onPress={this._toListDetail} />
-        </Left>
-        <Body style={styles.listBody}>
-          <Text>{list.list_title}</Text>
-        </Body>
-        <Right>
-          <Text>{this.props.goalStore.goalUndoneItems.get(list.list_id).length}</Text>
-        </Right>
-      </ListItem>
-    )
-  }
-}
+import GoalListItem from './GoalListItem'
 
 @inject('appConfigs', 'goalStore', 'navigationStore')
 @observer
 export default class GoalLists extends Component {
   @autobind
   _addList () {
-    const {goalStore} = this.props
+    const {goalLists} = this.props.goalStore
     const {colors} = this.props.appConfigs.config
     this.props.navigationStore.dispatchNavigation(
       NavigationActions.navigate({
@@ -79,7 +39,7 @@ export default class GoalLists extends Component {
           listMeta: {
             list_id: String(Date.now()),
             list_color: toJS(colors[Math.floor(Math.random() * colors.length)]),
-            list_order: goalStore.goalLists.length
+            list_order: goalLists.length
           },
           addMode: true
         }
@@ -89,14 +49,14 @@ export default class GoalLists extends Component {
 
   render () {
     return (
-      <View style={{flex: 1}}>
+      <View style={styles.goalListWrap}>
         <List button>{
           this.props.goalStore.goalLists.map(list =>
             <GoalListItem key={list.list_order} list={list} />
           )
         }</List>
         <Fab active
-          style={{backgroundColor: colors.primary}}
+          style={styles.fab}
           position='bottomRight'
           onPress={this._addList}
         >
@@ -108,14 +68,10 @@ export default class GoalLists extends Component {
 }
 
 const styles = StyleSheet.create({
-  listIconWrap: {
-    paddingRight: 10,
-    paddingTop: 2
+  goalListWrap: {
+    flex: 1
   },
-  listBody: {
-    paddingLeft: 5
-  },
-  listIconForward: {
-    color: colors.grey
+  fab: {
+    backgroundColor: colors.primary
   }
 })

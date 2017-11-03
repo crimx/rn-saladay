@@ -22,71 +22,14 @@ import Expo from 'expo'
 import autobind from 'autobind-decorator'
 
 import { inject, observer } from 'mobx-react'
-import { observable, action, computed } from 'mobx'
+import { observable } from 'mobx'
 
-import colors from '../style/colors'
+import ListForm from './ListForm'
 
 import {
-  Body, Button, Container, Content, Form,
-  Header, Icon, Input, Item, Label, Left, Right, Text, Title, Toast
+  Body, Button, Container, Content,
+  Header, Icon, Left, Right, Text, Title, Toast
 } from 'native-base'
-
-@inject('navigationStore')
-@observer
-class ListForm extends Component {
-  @computed get listDate () {
-    return new Date(Number(this.props.listMeta.list_id)).toLocaleString()
-  }
-
-  @action.bound
-  changeTitle (text) {
-    this.props.listMeta.list_title = text
-  }
-
-  @autobind
-  chooseNewColor () {
-    this.props.navigationStore.dispatchNavigation(
-      NavigationActions.navigate({
-        routeName: 'ColorPicker',
-        params: {
-          meta: this.props.listMeta,
-          key: 'list_color',
-          title: 'Choose New Color'
-        }
-      })
-    )
-  }
-
-  render () {
-    let {listMeta} = this.props
-    return (
-      <Form>
-        <Item stackedLabel>
-          <Label>Title</Label>
-          <Input
-            placeholder='Give your list a title'
-            placeholderTextColor={colors.grey}
-            value={listMeta.list_title}
-            onChangeText={this.changeTitle}
-          />
-        </Item>
-        <Item stackedLabel>
-          <Label>Color</Label>
-          <Button style={[styles.colorButton, {backgroundColor: listMeta.list_color}]}
-            onPress={this.chooseNewColor}
-          />
-        </Item>
-        <Item stackedLabel last>
-          <Label>Date Created</Label>
-          <Input editable={false}
-            style={{color: colors.greyDark}}
-            value={this.listDate}
-          />
-        </Item>
-      </Form>
-    )
-  }
-}
 
 @inject('goalStore')
 @observer
@@ -162,20 +105,5 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
     marginTop: Expo.Constants.statusBarHeight
-  },
-  colorButton: {
-    marginTop: 15,
-    marginBottom: 15,
-    width: 40,
-    height: 35
-  },
-  dueButton: {
-    justifyContent: 'flex-start'
-  },
-  dueButtonText: {
-    color: '#000',
-    paddingLeft: 0,
-    fontFamily: 'Roboto',
-    fontSize: 17
   }
 })
