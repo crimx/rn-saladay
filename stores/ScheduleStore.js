@@ -235,7 +235,6 @@ export default class ScheduleStore {
       .catch(err => console.error(err))
     this.selectedSchedules.clear()
   }
-
   /**
    * @return {Promise}
    */
@@ -243,12 +242,17 @@ export default class ScheduleStore {
   deleteSchedulesByGoalId (goalId) {
     return daoScheduleItems.removeByGoalId(goalId)
       .then(() => {
-        Promise.all(
-          this.sections.map(({key}) => this._getItemsByDate(key))
-        ).then(action(sectionItems => {
-          this.sections = observable.shallowArray(sectionItems)
-          this.selectedSchedules.clear()
-        }))
+        // sync the UI
+        this.schedules.forEach(
+          action(schedule => {
+            if (schedule.goal_id === goalId) {
+              schedule.goal_id = null
+              schedule.goal_color = colors.grey
+              schedule.goal_title = ''
+            }
+          })
+        )
+        this.clearSelection()
       })
   }
 }
