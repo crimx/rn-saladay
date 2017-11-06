@@ -27,39 +27,54 @@ import { observer } from 'mobx-react'
 
 import GoalLists from './GoalLists'
 import Schedule from './Schedule'
+import AppDrawer from './AppDrawer'
 
 import {
-  Body, Button, Container,
+  Body, Button, Container, Drawer,
   Header, Icon, Left, Right, StyleProvider, Tab, Tabs, Title
 } from 'native-base'
 
 @observer
 export default class AppContainer extends Component {
+  closeDrawer = () => {
+    this.refs.drawer._root.close()
+  }
+
+  openDrawer = () => {
+    this.refs.drawer._root.open()
+  }
+
   render () {
     return (
       <View style={styles.statusBar}>
         <StyleProvider style={getTheme(theme)}>
-          <Container style={styles.container}>
-            <Header hasTabs>
-              <Left>
-                <Button transparent>
-                  <Icon name='menu' />
-                </Button>
-              </Left>
-              <Body>
-                <Title>Saladay</Title>
-              </Body>
-              <Right />
-            </Header>
-            <Tabs locked initialPage={0} tabBarUnderlineStyle={{height: 2}}>
-              <Tab heading='Goals'>
-                <GoalLists />
-              </Tab>
-              <Tab heading='Schedule'>
-                <Schedule />
-              </Tab>
-            </Tabs>
-          </Container>
+          <Drawer
+            ref='drawer'
+            content={<AppDrawer />}
+            onClose={this.closeDrawer}
+          >
+            <Container style={styles.container}>
+              <Header hasTabs>
+                <Left>
+                  <Button transparent onPress={this.openDrawer}>
+                    <Icon name='menu' />
+                  </Button>
+                </Left>
+                <Body>
+                  <Title>Saladay</Title>
+                </Body>
+                <Right />
+              </Header>
+              <Tabs locked initialPage={0} tabBarUnderlineStyle={{height: 2}}>
+                <Tab heading='Goals'>
+                  <GoalLists />
+                </Tab>
+                <Tab heading='Schedule'>
+                  <Schedule />
+                </Tab>
+              </Tabs>
+            </Container>
+          </Drawer>
         </StyleProvider>
       </View>
     )
