@@ -24,12 +24,13 @@ const daoGoalLists = new GoalLists()
 const daoGoalItems = new GoalItems()
 
 export default class GoalStore {
-  @observable goalLists = []
+  @observable goalLists = observable.array()
   @observable goalUndoneItems = observable.map()
   @observable goalDoneItems = observable.map()
   @observable unsaveGoalItems = observable.map()
 
   constructor () {
+    this.reset()
     daoGoalLists.getAll()
       .then(action(lists => {
         lists.forEach(({list_id: listId}) => {
@@ -41,6 +42,14 @@ export default class GoalStore {
         })
         this.goalLists = lists
       }))
+  }
+
+  @action.bound
+  reset () {
+    this.goalLists.splice(0, this.goalLists.length)
+    this.goalUndoneItems.clear()
+    this.goalDoneItems.clear()
+    this.unsaveGoalItems.clear()
   }
 
   @action.bound
@@ -147,6 +156,7 @@ export default class GoalStore {
   @action.bound
   _addListSuccess (listItem) {
     this.goalLists.push(listItem)
+    this.goalUndoneItems.set(listItem.list_id, [])
   }
 
   updateList (listItem) {

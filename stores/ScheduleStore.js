@@ -51,6 +51,14 @@ export default class ScheduleStore {
     ).then(action(sectionItems => this.sections.push(...sectionItems)))
   }
 
+  @action.bound
+  reset () {
+    this.schedules.clear()
+    this.sections.splice(0, this.sections.length)
+    this.selectedSchedules.clear()
+    this.constructor()
+  }
+
   /**
   * @param {Date|string|number} date - Date instance or string in "YYYYDDMM" format or
   * string/number representing milliseconds elapsed since the UNIX epoch

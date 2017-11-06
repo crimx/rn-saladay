@@ -23,6 +23,7 @@ import GoalItems from './goal_items'
 import ScheduleItems from './schedule_items'
 
 import { getDate } from './helpers'
+import autobind from 'autobind-decorator'
 
 export default class Dao {
   constructor () {
@@ -30,10 +31,9 @@ export default class Dao {
     this.db = SQLite.openDatabase('saladay.db')
   }
 
+  @autobind
   init () {
     let tables = new Tables(this.db)
-    // return tables.drop()
-    //   .then(() => tables.list())
     return tables.list()
       .then(tbs => {
         if (tbs.indexOf('configs') === -1) {
@@ -45,10 +45,20 @@ export default class Dao {
       .catch(err => console.error(err))
   }
 
+  @autobind
+  reset () {
+    let tables = new Tables(this.db)
+    return tables.drop()
+      .then(() => tables.list())
+      .then(() => tables.init())
+      .catch(err => console.error(err))
+  }
+
   /**
    * Insert default data
    * @return Promise
    */
+  @autobind
   initData () {
     const goalListsData = [
       {
