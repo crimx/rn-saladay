@@ -26,6 +26,7 @@ export default class ScheduleItem extends Component {
 
   render () {
     const schedule = this.props.scheduleStore.schedules.get(this.props.item)
+    if (!schedule) { return null }
     return (
       <TouchableWithoutFeedback useForeground onPress={this._onPress}>
         <View style={styles.listItemWrap}>

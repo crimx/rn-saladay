@@ -61,11 +61,14 @@ export default class ListDetail extends Component {
         })
         this.props.navigation.dispatch(NavigationActions.back())
       })
-      .catch(() => Toast.show({
-        text: `Cannot ${this.addMode ? 'add' : 'update'} list`,
-        type: 'danger',
-        duration: 2500
-      }))
+      .catch(err => {
+        Toast.show({
+          text: `Cannot ${this.addMode ? 'add' : 'update'} list`,
+          type: 'danger',
+          duration: 2500
+        })
+        __DEV__ && console.error(err)
+      })
   }
 
   @autobind
