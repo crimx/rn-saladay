@@ -16,10 +16,27 @@
  */
 
 import React, { Component } from 'react'
-import { View, StyleSheet, TouchableNativeFeedback, FlatList } from 'react-native'
+import { View, StyleSheet, TouchableNativeFeedback, FlatList, Text } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { NavigationActions } from 'react-navigation'
 import { inject, observer } from 'mobx-react'
+
+/**
+ * Counts the total selection. Make it another component so that
+ * the Menu won't have to rerender every time selection changes.
+ */
+@inject('scheduleStore')
+@observer
+class SelectCount extends Component {
+  render () {
+    return (
+      <View style={styles.selectCount}>
+        <MaterialCommunityIcons name='chevron-down' color='#fff' size={20} />
+        <Text style={styles.selectCountText}>{this.props.scheduleStore.selectedSchedules.size}</Text>
+      </View>
+    )
+  }
+}
 
 class MenuButton extends Component {
   render () {
@@ -65,7 +82,7 @@ export default class ScheduleMenu extends Component {
         <MaterialCommunityIcons name='menu-down' color='#fff' size={35} />
       </MenuButton>,
       <MenuButton onPress={clearSelection}>
-        <MaterialCommunityIcons name='chevron-down' color='#fff' size={20} />
+        <SelectCount />
       </MenuButton>
     ]
   }
@@ -126,6 +143,15 @@ const styles = StyleSheet.create({
   },
   menuButtonText: {
     fontSize: 14,
+    color: '#fff'
+  },
+  selectCount: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  selectCountText: {
+    paddingBottom: 2,
+    marginRight: 4,
     color: '#fff'
   }
 })
