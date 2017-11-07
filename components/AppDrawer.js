@@ -130,6 +130,7 @@ export default class AppDrawer extends Component {
             </List>
           </Content>
         </Container>
+        <Text style={styles.copyright}>Copyright © 2017 CRIMX</Text>
       </View>
     )
   }
@@ -168,5 +169,12 @@ const styles = StyleSheet.create({
   },
   btnReset: {
     color: '#d91e18'
+  },
+  copyright: {
+    height: 40,
+    fontSize: 12,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    color: '#aaa'
   }
 })
