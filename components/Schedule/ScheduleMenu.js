@@ -32,7 +32,9 @@ class SelectCount extends Component {
     return (
       <View style={styles.selectCount}>
         <MaterialCommunityIcons name='chevron-down' color='#fff' size={20} />
-        <Text style={styles.selectCountText}>{this.props.scheduleStore.selectedSchedules.size}</Text>
+        <Text style={styles.selectCountText}>{
+          (this.props.scheduleStore.selectedSchedules.size / 2).toFixed(1)
+        } h</Text>
       </View>
     )
   }
@@ -81,7 +83,7 @@ export default class ScheduleMenu extends Component {
       <MenuButton onPress={moveSelectionDownwards}>
         <MaterialCommunityIcons name='menu-down' color='#fff' size={35} />
       </MenuButton>,
-      <MenuButton onPress={clearSelection}>
+      <MenuButton onPress={clearSelection} style={{width: 55}}>
         <SelectCount />
       </MenuButton>
     ]
