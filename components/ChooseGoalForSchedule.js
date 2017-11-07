@@ -83,11 +83,13 @@ class ItemSeparatorComponent extends Component {
 export default class ChooseGoalForSchedule extends Component {
   @computed get _sections () {
     const {goalLists, goalUndoneItems} = this.props.goalStore
-    return goalLists.map(({list_id: key, list_title: title}) => ({
-      key,
-      title,
-      data: goalUndoneItems.get(key).map(item => ({key: item.goal_date, data: item}))
-    }))
+    return goalLists
+      .map(({list_id: key, list_title: title}) => ({
+        key,
+        title,
+        data: goalUndoneItems.get(key).map(item => ({key: item.goal_date, data: item}))
+      }))
+      .filter(({data}) => data.length > 0)
   }
 
   _goBack = () => {
