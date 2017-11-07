@@ -29,38 +29,44 @@ useStrict(true) // not allowed to change any state outside of an action
 
 Expo.ScreenOrientation.allow(Expo.ScreenOrientation.Orientation.PORTRAIT_UP)
 
+var stores = {}
+
 export default class Wrapper extends Component {
   state = {
-    fontsAreLoaded: false,
-    daoLoaded: false
+    isReady: false
   }
 
-  @observable stores = {}
-
-  componentWillMount () {
-    Expo.Font.loadAsync({
-      'Roboto_medium': require('native-base/Fonts/Roboto_medium.ttf')
-    }).then(() => this.setState({fontsAreLoaded: true}))
-
+  async _cacheResourcesAsync () {
     const dao = new Dao()
-    dao.init()
-      .then(() => {
-        this.stores = new Stores()
-        return this.stores.appConfigs.get()
-      })
-      .then(() => this.setState({dbLoaded: true}))
+    return Promise.all([
+      Expo.Font.loadAsync({
+        'Roboto_medium': require('native-base/Fonts/Roboto_medium.ttf')
+      }),
+
+      dao.init()
+        .then(() => {
+          stores = new Stores()
+          return stores.appConfigs.get()
+        })
+    ])
   }
 
   render () {
-    if (this.state.fontsAreLoaded && this.state.dbLoaded) {
+    if (!this.state.isReady) {
       return (
-        <Root>
-          <Provider {...this.stores}>
-            <AppNavigation />
-          </Provider>
-        </Root>
+        <Expo.AppLoading
+          startAsync={this._cacheResourcesAsync}
+          onFinish={() => this.setState({isReady: true})}
+          onError={console.warn}
+        />
       )
     }
-    return <Expo.AppLoading />
+    return (
+      <Root>
+        <Provider {...stores}>
+          <AppNavigation />
+        </Provider>
+      </Root>
+    )
   }
 }
