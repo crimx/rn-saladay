@@ -53,7 +53,7 @@ export default class ListDetail extends Component {
     return (this.addMode ? goalStore.addList(listMeta) : goalStore.updateList(listMeta))
       .then(() => {
         ToastAndroid.show(
-          `List ${this.addMode ? 'added' : 'updated'} successfully`,
+          `List ${this.addMode ? 'added' : 'updated'}`,
           ToastAndroid.SHORT
         )
         this.props.navigation.dispatch(NavigationActions.back())

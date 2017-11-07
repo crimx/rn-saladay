@@ -57,7 +57,7 @@ export default class GoalDetail extends Component {
     return (this.addMode ? goalStore.addGoalItem(goalMeta) : goalStore.updateGoalItem(goalMeta))
       .then(() => {
         ToastAndroid.show(
-          `Item ${this.addMode ? 'added' : 'updated'} successfully`,
+          `Item ${this.addMode ? 'added' : 'updated'}`,
           ToastAndroid.SHORT
         )
         this.props.navigation.dispatch(NavigationActions.back())
