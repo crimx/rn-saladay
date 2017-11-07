@@ -16,9 +16,9 @@
  */
 
 import React, { Component } from 'react'
-import { View, StyleSheet, Image, Alert } from 'react-native'
+import { View, StyleSheet, Image, Alert, ToastAndroid } from 'react-native'
 import Expo from 'expo'
-import { Container, Content, List, ListItem, Text, Icon, Left, Body, Toast } from 'native-base'
+import { Container, Content, List, ListItem, Text, Icon, Left, Body } from 'native-base'
 import { inject } from 'mobx-react'
 import Dao from '../dao'
 import colors from '../style/colors'
@@ -61,18 +61,16 @@ export default class AppDrawer extends Component {
               this.props.goalStore.reset()
             })
             .then(() => {
-              Toast.show({
-                text: `Database deleted`,
-                buttonText: 'OK',
-                duration: 2000
-              })
+              ToastAndroid.show(
+                `Database deleted`,
+                ToastAndroid.SHORT
+              )
             })
             .catch(err => {
-              Toast.show({
-                text: `Cannot delete database`,
-                type: 'danger',
-                duration: 2000
-              })
+              ToastAndroid.show(
+                `Cannot delete database`,
+                ToastAndroid.LONG
+              )
               __DEV__ && console.error(err)
             })
         }

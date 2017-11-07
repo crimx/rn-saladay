@@ -16,7 +16,7 @@
  */
 
 import React, { Component } from 'react'
-import { StyleSheet, DatePickerAndroid, TimePickerAndroid } from 'react-native'
+import { StyleSheet, DatePickerAndroid, TimePickerAndroid, ToastAndroid } from 'react-native'
 import { NavigationActions } from 'react-navigation'
 import autobind from 'autobind-decorator'
 
@@ -26,7 +26,7 @@ import { action, computed } from 'mobx'
 import colors from '../../style/colors'
 
 import AutoExpandInput from '../lib/AutoExpandInput'
-import { Button, Form, Input, Item, Label, Text, Toast } from 'native-base'
+import { Button, Form, Input, Item, Label, Text } from 'native-base'
 
 @inject('navigationStore')
 @observer
@@ -95,12 +95,10 @@ export default class GoalForm extends Component {
       })
       .then(this._changeDue, this._chooseDue) // TimePicker Dismissed, back to DatePicker
       .catch(err => {
-        Toast.show({
-          text: `Cannot open date picker`,
-          buttonText: 'OK',
-          type: 'danger',
-          duration: 2000
-        })
+        ToastAndroid.show(
+          `Cannot open date picker`,
+          ToastAndroid.LONG
+        )
         __DEV__ && console.error(err)
       })
   }

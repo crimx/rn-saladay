@@ -16,7 +16,7 @@
  */
 
 import React, { Component } from 'react'
-import { View, StyleSheet, Keyboard } from 'react-native'
+import { View, StyleSheet, Keyboard, ToastAndroid } from 'react-native'
 import { NavigationActions } from 'react-navigation'
 import Expo from 'expo'
 import autobind from 'autobind-decorator'
@@ -28,7 +28,7 @@ import ListForm from './ListForm'
 
 import {
   Body, Button, Container, Content,
-  Header, Icon, Left, Right, Text, Title, Toast
+  Header, Icon, Left, Right, Text, Title
 } from 'native-base'
 
 @inject('goalStore')
@@ -42,31 +42,27 @@ export default class ListDetail extends Component {
   saveList () {
     Keyboard.dismiss()
     if (!this.listMeta.list_title) {
-      return Toast.show({
-        text: 'Please enter title',
-        buttonText: 'OK',
-        type: 'warning',
-        duration: 2500
-      })
+      return ToastAndroid.show(
+        'Please enter title',
+        ToastAndroid.LONG
+      )
     }
 
     const {goalStore} = this.props
     const listMeta = this.listMeta
     return (this.addMode ? goalStore.addList(listMeta) : goalStore.updateList(listMeta))
       .then(() => {
-        Toast.show({
-          text: `List ${this.addMode ? 'added' : 'updated'} successfully`,
-          buttonText: 'OK',
-          duration: 2500
-        })
+        ToastAndroid.show(
+          `List ${this.addMode ? 'added' : 'updated'} successfully`,
+          ToastAndroid.SHORT
+        )
         this.props.navigation.dispatch(NavigationActions.back())
       })
       .catch(err => {
-        Toast.show({
-          text: `Cannot ${this.addMode ? 'add' : 'update'} list`,
-          type: 'danger',
-          duration: 2500
-        })
+        ToastAndroid.show(
+          `Cannot ${this.addMode ? 'add' : 'update'} list`,
+          ToastAndroid.LONG
+        )
         __DEV__ && console.error(err)
       })
   }

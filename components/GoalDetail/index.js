@@ -16,7 +16,7 @@
  */
 
 import React, { Component } from 'react'
-import { View, StyleSheet, Keyboard, Alert } from 'react-native'
+import { View, StyleSheet, Keyboard, Alert, ToastAndroid } from 'react-native'
 import { NavigationActions } from 'react-navigation'
 import Expo from 'expo'
 import autobind from 'autobind-decorator'
@@ -27,7 +27,7 @@ import { observable, action } from 'mobx'
 import GoalForm from './GoalForm'
 import {
   Body, Button, Container, Content,
-  Header, Icon, Left, Right, Text, Title, Toast
+  Header, Icon, Left, Right, Text, Title
 } from 'native-base'
 
 @inject('goalStore', 'scheduleStore')
@@ -41,12 +41,10 @@ export default class GoalDetail extends Component {
   _saveItem () {
     Keyboard.dismiss()
     if (!this.goalMeta.goal_title) {
-      return Toast.show({
-        text: 'Please enter title',
-        buttonText: 'OK',
-        type: 'warning',
-        duration: 2000
-      })
+      return ToastAndroid.show(
+        'Please enter title',
+        ToastAndroid.LONG
+      )
     }
 
     const {goalStore} = this.props
@@ -58,19 +56,17 @@ export default class GoalDetail extends Component {
 
     return (this.addMode ? goalStore.addGoalItem(goalMeta) : goalStore.updateGoalItem(goalMeta))
       .then(() => {
-        Toast.show({
-          text: `Item ${this.addMode ? 'added' : 'updated'} successfully`,
-          buttonText: 'OK',
-          duration: 2000
-        })
+        ToastAndroid.show(
+          `Item ${this.addMode ? 'added' : 'updated'} successfully`,
+          ToastAndroid.SHORT
+        )
         this.props.navigation.dispatch(NavigationActions.back())
       })
       .catch(err => {
-        Toast.show({
-          text: `Cannot ${this.addMode ? 'add' : 'update'} item`,
-          type: 'danger',
-          duration: 2000
-        })
+        ToastAndroid.show(
+          `Cannot ${this.addMode ? 'add' : 'update'} item`,
+          ToastAndroid.LONG
+        )
         __DEV__ && console.error(err)
       })
   }
@@ -94,19 +90,17 @@ export default class GoalDetail extends Component {
           onPress: () => this.props.goalStore.deleteItem(this.goalMeta)
             .then(() => this.props.scheduleStore.deleteSchedulesByGoalId(this.goalMeta.goal_date))
             .then(() => {
-              Toast.show({
-                text: `Item deleted`,
-                buttonText: 'OK',
-                duration: 2000
-              })
+              ToastAndroid.show(
+                `Item deleted`,
+                ToastAndroid.SHORT
+              )
               this.props.navigation.dispatch(NavigationActions.back())
             })
             .catch(err => {
-              Toast.show({
-                text: `Cannot delete item`,
-                type: 'danger',
-                duration: 2000
-              })
+              ToastAndroid.show(
+                `Cannot delete item`,
+                ToastAndroid.LONG
+              )
               __DEV__ && console.error(err)
             })
         }
