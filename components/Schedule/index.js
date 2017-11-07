@@ -26,10 +26,11 @@ import { inject, observer } from 'mobx-react'
 import autobind from 'autobind-decorator'
 import colors from '../../style/colors'
 
-const { width: deviceWidth } = Dimensions.get('window')
+const { width: deviceWidth, height: deviceHeight } = Dimensions.get('window')
 const sectionHeaderHeight = 40
 const sectionItemHeight = 45
 const sectionHeight = sectionHeaderHeight + sectionItemHeight * 24
+var listHeight = deviceHeight - 121
 
 class SectionRow extends Component {
   shouldComponentUpdate (nextProps) {
@@ -41,7 +42,7 @@ class SectionRow extends Component {
     const {row, index} = this.props
     return (
       <View style={styles.listRow}>
-        <Text style={styles.listRowTime}>{`${index}:00`}</Text>
+        <Text style={styles.listRowTime}>{`${23 - index}:00`}</Text>
         <ScheduleItem item={row[0]} />
         <ScheduleItem item={row[1]} />
       </View>
@@ -92,10 +93,10 @@ class BackToToday extends Component {
 export default class Schedule extends Component {
   _getItemLayout = sectionListGetItemLayout({
     getItemHeight: () => sectionItemHeight,
-    getSectionHeaderHeight: () => sectionHeaderHeight
+    getSectionFooterHeight: () => sectionHeaderHeight
   })
 
-  _renderSectionHeader = ({ section }) => <SectionHeader section={section} />
+  _renderSectionFooter = ({ section }) => <SectionHeader section={section} />
 
   _renderItem = ({ item }) => <SectionRow row={item.data} index={item.index} />
 
@@ -111,7 +112,16 @@ export default class Schedule extends Component {
   _onRefresh () {
     this._refreshing = true
     this.props.scheduleStore.addNextDate()
-      .then(action(() => (this._refreshing = false)))
+      .then(action(() => {
+        this._refreshing = false
+        setTimeout(() => {
+          this.refs.listRef.scrollToLocation({
+            sectionIndex: 0,
+            itemIndex: 24,
+            viewPosition: 1
+          })
+        }, 0)
+      }))
   }
 
   @autobind
@@ -123,8 +133,8 @@ export default class Schedule extends Component {
   _backToToday () {
     this.refs.listRef.scrollToLocation({
       sectionIndex: this.props.scheduleStore.todaySectionIndex,
-      itemIndex: 0,
-      viewOffset: sectionHeaderHeight
+      itemIndex: 24,
+      viewPosition: 1
     })
   }
 
@@ -135,32 +145,39 @@ export default class Schedule extends Component {
     clearTimeout(this._scrollTimeout)
     this._scrollTimeout = setTimeout(() => {
       this._setTodayOutOfSightDirection(nativeEvent.contentOffset.y)
-    }, 15)
+    }, 4)
   }
 
   @action.bound
   _setTodayOutOfSightDirection (y) {
     const offset = this._todayY - y
     if (offset > sectionHeight) {
-      this._todayOutOfSightDirection = 'down'
-    } else if (offset < -sectionHeight) {
       this._todayOutOfSightDirection = 'up'
+    } else if (offset < -sectionHeight) {
+      this._todayOutOfSightDirection = 'down'
     } else {
       this._todayOutOfSightDirection = false
     }
   }
 
+  @autobind
+  _onListWrapLayout () {
+    this.refs.listWrapRef.measure((x, y, width, height, pageX, pageY) => {
+      listHeight = height
+    })
+  }
+
   render () {
     return (
-      <View>
+      <View ref='listWrapRef' onLayout={this._onListWrapLayout}>
         <SectionList
           ref='listRef'
-          stickySectionHeadersEnabled
-          initialScrollIndex={25}
+          inverted
+          initialScrollIndex={26 + 25 - Math.floor((listHeight - sectionHeaderHeight) / sectionItemHeight)}
           initialNumToRender={15}
           getItemLayout={this._getItemLayout}
           sections={this.props.scheduleStore.sections.slice()}
-          renderSectionHeader={this._renderSectionHeader}
+          renderSectionFooter={this._renderSectionFooter}
           renderItem={this._renderItem}
           removeClippedSubviews
           showsVerticalScrollIndicator={false}
@@ -168,7 +185,7 @@ export default class Schedule extends Component {
           refreshing={this._refreshing}
           onRefresh={this._onRefresh}
           onEndReached={this._onEndReached}
-          onEndReachedThreshold={1}
+          onEndReachedThreshold={10}
           onScroll={this._onScroll}
         />
         <ScheduleMenu />

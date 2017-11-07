@@ -169,11 +169,11 @@ export default class ScheduleStore {
     this.clearSelection()
     ids.forEach(id => {
       let [date, index] = devideScheduleId(id)
-      if (index <= 1) {
-        // 0 & 1 are in the first row
-        this.toggleItemSelection(genScheduleId(getNextDate(date), 46 + index))
+      if (index >= 46) {
+        // 46 & 47 are in the first row
+        this.toggleItemSelection(genScheduleId(getPrevDate(date), index - 46))
       } else {
-        this.toggleItemSelection(genScheduleId(date, index - 2))
+        this.toggleItemSelection(genScheduleId(date, index + 2))
       }
     })
   }
@@ -187,11 +187,11 @@ export default class ScheduleStore {
     this.clearSelection()
     ids.forEach(id => {
       let [date, index] = devideScheduleId(id)
-      if (index >= 46) {
-        // 46 & 47 are in the last row
-        this.toggleItemSelection(genScheduleId(getPrevDate(date), index - 46))
+      if (index <= 1) {
+        // 0 & 1 are in the last row
+        this.toggleItemSelection(genScheduleId(getNextDate(date), index + 46))
       } else {
-        this.toggleItemSelection(genScheduleId(date, index + 2))
+        this.toggleItemSelection(genScheduleId(date, index - 2))
       }
     })
   }
