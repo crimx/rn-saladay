@@ -1,5 +1,16 @@
 {
   "expo": {
+    "name": "Saladay",
+    "icon": "./assets/logo.png",
+    "version": "1.0.0",
+    "android": {
+      "package": "com.crimx.saladay"
+    },
+    "splash": {
+      "image": "./assets/splash.png",
+      "backgroundColor": "#009688",
+      "resizeMode": "contain"
+    },
     "sdkVersion": "21.0.0"
   }
 }
