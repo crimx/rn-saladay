@@ -1,6 +1,8 @@
 # Saladay
 
-Currently under active development.
+An android GTD app that focuses on the "big rocks". 
+
+Open on Expo: https://expo.io/@crimx/saladay
 
 # Credits
 
